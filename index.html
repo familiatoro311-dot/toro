@@ -266,7 +266,7 @@
                     <span id="net-text">Conectado</span>
                 </div>
             </div>
-            <div class="tasa-box" onclick="cambiarTasaManual()">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
+            <div class="tasa-box" onclick="alert('Tasa Fija')">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
         </header>
 
         <section id="pantalla-ventas" class="pantalla activa">
@@ -290,6 +290,113 @@
         </section>
 
         <section id="pantalla-inventario" class="pantalla">
-            <button class="btn-primario" onclick="alert('Función añadir nuevo producto')">+ Nuevo Producto</button>
             <div class="caja-contenedor">
-                <table
+                <table class="tabla-toro">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th>Stock</th>
+                            <th>Precio Venta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-inventario-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="pantalla-reportes" class="pantalla">
+            <div class="resumen-cards-container">
+                <div class="card-resumen"><p>Bruto</p><h3 id="card-total-usd">0.00$</h3></div>
+                <div class="card-resumen"><p>Bolívares</p><h3 id="card-total-bs">0 Bs</h3></div>
+                <div class="card-resumen"><p>Transac.</p><h3 id="card-cant-ventas">0</h3></div>
+            </div>
+            <div class="caja-contenedor">
+                <table class="tabla-toro">
+                    <thead id="tabla-reportes-header"></thead>
+                    <tbody id="tabla-reportes-body"></tbody>
+                </table>
+                <div id="msg-reportes-vacio" class="vacio-msg">No hay registros guardados.</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbx5d9ZsEe0AEjwaE1R-uPVP5zh6g6obIALG_RE9k6t7U4PKbsZzNlbet9zEMwjcJVvi/exec";
+        let cacheProductos = [];
+        let cacheVentas = [];
+        let carrito = [];
+        let filtroTiempoActual = 'hoy';
+        let ventaEditandoId = null; 
+
+        // CORREGIDO AQUÍ: Cambio de 'bierto' a 'abierto' para desbloquear todo
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('abierto'); }
+        function getTasa() { return 700; }
+
+        function setNetStatus(loading, text = "Conectado") {
+            document.getElementById('net-dot').className = loading ? "sync-dot loading" : "sync-dot";
+            document.getElementById('net-text').innerText = text;
+        }
+
+        async function sincronizarTodo(silencioso = false) {
+            if(!silencioso) setNetStatus(true);
+            try {
+                let resProd = await fetch(`${API_URL}?action=obtenerProductos`);
+                cacheProductos = await resProd.json();
+                let resVentas = await fetch(`${API_URL}?action=obtenerVentas`);
+                cacheVentas = await resVentas.json();
+                renderizarInventario();
+                renderizarReportes();
+                setNetStatus(false, "Al día");
+            } catch (err) { setNetStatus(false, "Offline"); }
+        }
+
+        function cambiarPantalla(pantallaId, elemento) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('activo'));
+            document.getElementById(`pantalla-${pantallaId}`).classList.add('activa');
+            if(elemento) elemento.classList.add('activo');
+            document.getElementById('txt-titulo-pantalla').innerText = pantallaId.toUpperCase();
+            
+            const subMenu = document.getElementById('sub-menu-reportes-container');
+            if(pantallaId === 'reportes') subMenu.classList.add('visible');
+            else subMenu.classList.remove('visible');
+            document.getElementById('sidebar').classList.remove('abierto');
+        }
+
+        function filtrarReporteTiempo(rango, boton) {
+            document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('activo'));
+            boton.classList.add('activo');
+            filtroTiempoActual = rango;
+            renderizarReportes();
+            document.getElementById('sidebar').classList.remove('abierto');
+        }
+
+        function renderizarInventario() {
+            let tbody = document.getElementById('tabla-inventario-body');
+            tbody.innerHTML = '';
+            cacheProductos.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${p.codigo}</small></td>
+                        <td><strong>${p.nombre}</strong></td>
+                        <td>${p.marca}</td>
+                        <td>
+                            <div class="stock-control">
+                                <button class="btn-stock" onclick="modificarStockLocal('${p.codigo}', -1)">-</button>
+                                <span>${p.stock}</span>
+                                <button class="btn-stock" onclick="modificarStockLocal('${p.codigo}', 1)">+</button>
+                            </div>
+                        </td>
+                        <td><strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong></td>
+                    </tr>`;
+            });
+        }
+
+        async function modificarStockLocal(codigo, cambio) {
+            let p = cacheProductos.find(item => item.codigo === codigo);
+            if(p) { p.stock = Math.max(0, p.stock + cambio); renderizarInventario(); }
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "modificarStock", codigo: codigo, cambio: cambio }) });
+            } catch(
