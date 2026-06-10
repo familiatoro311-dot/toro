@@ -307,6 +307,11 @@
         </section>
 
         <section id="pantalla-inventario" class="pantalla">
+            <div class="buscador-container">
+                <div class="search-badge">LISTA</div>
+                <input type="text" id="input-buscar-inventario" class="buscador-input" placeholder="FILTRAR INVENTARIO..." oninput="filtrarTablaInventario(this.value)" autocomplete="off">
+            </div>
+            
             <div class="caja-contenedor">
                 <table class="tabla-toro">
                     <thead>
@@ -368,11 +373,12 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzMUFl55ZLTMSt2_g1M8n2Yxd9t5KxmHa8I7jqEPwpMWBo0I9CuBp0eK0EdSxriIz7e/exec";
+        // ¡RECUERDA PEGAR TU ENLACE /exec RECIENTE AQUÍ ADENTRO!
+        const API_URL = "https://script.google.com/macros/s/AKfycbz5d9ZsEe0AEjwaE1R-uPVP5zh6g6obIALG_RE9k6t7U4PKbsZzNlbet9zEMwjcJVvi/exec";
         let cacheProductos = [];
         let cacheVentas = [];
         let cacheTasas = [];
-        let tasaActualDolar = 700; // Valor por defecto en caso de fallo de red
+        let tasaActualDolar = 700; 
         let carrito = [];
         let filtroTiempoActual = 'hoy';
         let ventaEditandoId = null; 
@@ -393,7 +399,6 @@
                 let resVentas = await fetch(`${API_URL}?action=obtenerVentas`);
                 cacheVentas = await resVentas.json();
                 
-                // Pedir el historial de tasas reales de la nube
                 let resTasas = await fetch(`${API_URL}?action=obtenerHistorialTasa`);
                 cacheTasas = await resTasas.json();
                 
@@ -409,16 +414,13 @@
             } catch (err) { setNetStatus(false, "Offline"); }
         }
 
-        /* --- LOGICA MODAL DE TASA --- */
         function abrirModalTasa() {
             document.getElementById('modal-tasa-container').style.display = 'flex';
             document.getElementById('input-nueva-tasa').value = tasaActualDolar;
             renderizarHistorialTasasModal();
         }
 
-        function cerrarModalTasa() {
-            document.getElementById('modal-tasa-container').style.display = 'none';
-        }
+        function cerrarModalTasa() { document.getElementById('modal-tasa-container').style.display = 'none'; }
 
         function renderizarHistorialTasasModal() {
             let tbody = document.getElementById('tabla-historial-tasa-body');
@@ -431,18 +433,13 @@
             copiaTasas.forEach(t => {
                 let f = new Date(t.fecha);
                 let fechaStr = f.toLocaleDateString('es-VE', {day:'2-digit', month:'2-digit'}) + ' ' + f.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
-                tbody.innerHTML += `
-                    <tr>
-                        <td><small>${fechaStr}</small></td>
-                        <td style="text-align: right;"><strong>${parseFloat(t.valor).toFixed(2)} Bs</strong></td>
-                    </tr>`;
+                tbody.innerHTML += `<tr><td><small>${fechaStr}</small></td><td style="text-align: right;"><strong>${parseFloat(t.valor).toFixed(2)} Bs</strong></td></tr>`;
             });
         }
 
         async function guardarNuevaTasaNube() {
             let nueva = parseFloat(document.getElementById('input-nueva-tasa').value);
             if(isNaN(nueva) || nueva <= 0) { alert("Ingresa un número válido."); return; }
-            
             setNetStatus(true);
             cerrarModalTasa();
             try {
@@ -451,13 +448,8 @@
                     body: JSON.stringify({ action: "actualizarTasa", nueva_tasa: nueva })
                 });
                 let resJson = await response.json();
-                if(resJson.status === 'success') {
-                    sincronizarTodo(true);
-                }
-            } catch(e) {
-                alert("Error de conexión al guardar la tasa.");
-                setNetStatus(false, "Error");
-            }
+                if(resJson.status === 'success') { sincronizarTodo(true); }
+            } catch(e) { alert("Error de conexión al guardar la tasa."); setNetStatus(false, "Error"); }
         }
 
         function cambiarPantalla(pantallaId, elemento) {
@@ -499,6 +491,24 @@
                         </td>
                         <td><strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong></td>
                     </tr>`;
+            });
+            // Si hay algo escrito en la barra de búsqueda al sincronizar, mantiene el filtro activo
+            let busquedaActual = document.getElementById('input-buscar-inventario').value;
+            if(busquedaActual) filtrarTablaInventario(busquedaActual);
+        }
+
+        // NUEVA FUNCIÓN: Filtra las filas de la tabla de inventario dinámicamente
+        function filtrarTablaInventario(query) {
+            let txt = query.toUpperCase().trim();
+            let filas = document.querySelectorAll('#tabla-inventario-body tr');
+            
+            filas.forEach(fila => {
+                let textoFila = fila.textContent.toUpperCase();
+                if (textoFila.includes(txt)) {
+                    fila.style.display = ""; // Muestra la fila
+                } else {
+                    fila.style.display = "none"; // Oculta la fila
+                }
             });
         }
 
@@ -585,20 +595,13 @@
             let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
             let copia = [...carrito];
             
-            let payload = { 
-                action: "procesarVenta", 
-                items: copia, 
-                total_usd: total, 
-                tasa_applied: getTasa() 
-            };
-            
+            let payload = { action: "procesarVenta", items: copia, total_usd: total, tasa_applied: getTasa() };
             if(ventaEditandoId !== null) { payload.modificarVentaId = ventaEditandoId; }
 
             carrito = []; 
             ventaEditandoId = null; 
             renderizarCarrito();
             setNetStatus(true);
-            
             try {
                 await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 sincronizarTodo(true);
