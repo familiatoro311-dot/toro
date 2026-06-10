@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toro - Sistema de Ventas Móvil</title>
+    <title>Toro - Sistema de Ventas Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -28,16 +28,15 @@
             color: var(--texto-principal);
         }
 
-        /* CORRECCIÓN CENTRAL: Permitir scroll vertical real en el teléfono */
         body {
             background-color: var(--blanco);
             min-height: 100vh;
             overflow-y: auto; 
             position: relative;
-            padding-bottom: 80px; /* Espacio de seguridad para que el botón de procesar venta no tape nada */
+            padding-bottom: 90px; 
         }
 
-        /* --- MENÚ LATERAL MEJORADO PARA MÓVIL --- */
+        /* --- SIDEBAR --- */
         #sidebar {
             position: fixed;
             top: 0;
@@ -52,9 +51,7 @@
             z-index: 1000;
         }
 
-        #sidebar.abierto {
-            width: 200px;
-        }
+        #sidebar.abierto { width: 200px; }
 
         .btn-menu {
             background: none;
@@ -86,16 +83,32 @@
             transition: opacity 0.2s;
         }
 
-        #sidebar.abierto .nav-item span {
-            opacity: 1;
-        }
+        #sidebar.abierto .nav-item span { opacity: 1; }
+        .nav-item.activo { background-color: var(--bg-principal); border-radius: 10px 0 0 10px; }
 
-        .nav-item.activo {
-            background-color: var(--bg-principal);
-            border-radius: 10px 0 0 10px;
+        /* SUB-MENÚ REPORTES INTERACTIVO */
+        .sub-menu-reportes {
+            display: none;
+            width: 100%;
+            padding: 0 10px;
+            margin-top: 5px;
         }
+        #sidebar.abierto .sub-menu-reportes.visible { display: block; }
+        .sub-nav-item {
+            background-color: var(--blanco);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        .sub-nav-item.activo { background-color: var(--verde-oscuro); color: var(--blanco); }
 
-        /* --- CONTENEDOR DE LA APP (YA NO ESTÁ CONGELADO) --- */
+        /* --- CONTENEDOR PRINCIPAL --- */
         #contenido-app {
             margin-left: 65px;
             padding: 15px;
@@ -109,11 +122,7 @@
             margin-bottom: 20px;
         }
 
-        .titulo-pantalla {
-            font-size: 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
+        .titulo-pantalla { font-size: 20px; font-weight: 700; text-transform: uppercase; }
 
         .tasa-box {
             font-size: 13px;
@@ -124,22 +133,15 @@
             cursor: pointer;
         }
 
-        /* --- PESTAÑAS --- */
-        .pantalla {
-            display: none;
-        }
+        .pantalla { display: none; }
+        .pantalla.activa { display: block; }
 
-        .pantalla.activa {
-            display: block;
-        }
-
-        /* CAJA VERDE CONTENEDORA (Con scroll propio si se necesita) */
         .caja-contenedor {
             background-color: var(--bg-principal);
             border-radius: var(--radio);
             padding: 15px;
             margin-bottom: 20px;
-            overflow-x: auto; /* Scroll horizontal si las tablas son muy anchas */
+            overflow-x: auto; 
         }
 
         /* --- BARRA DE BÚSQUEDA --- */
@@ -173,16 +175,8 @@
             text-transform: uppercase;
         }
 
-        .btn-qr {
-            width: 50px;
-            background-color: var(--verde-contenedor);
-            border: none;
-            border-left: 1px solid var(--texto-principal);
-            cursor: pointer;
-            font-size: 18px;
-        }
+        .btn-qr { width: 50px; background-color: var(--verde-contenedor); border: none; border-left: 1px solid var(--texto-principal); cursor: pointer; font-size: 18px; }
 
-        /* RESULTADOS BÚSQUEDA FLOTANTE */
         .resultados-busqueda {
             position: absolute;
             background: var(--blanco);
@@ -196,184 +190,65 @@
             box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
         }
 
-        .resultado-item {
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-        }
+        .resultado-item { padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; }
 
-        /* --- REESTRUCTURACIÓN COMPLETA DEL CARRITO EN MÓVIL --- */
-        .carrito-item-card {
-            background: var(--blanco);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        /* --- CARDS DE VENTA DEL CARRITO --- */
+        .carrito-item-card { background: var(--blanco); border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .carrito-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+        .carrito-prod-titulo { font-size: 14px; font-weight: 700; text-transform: uppercase; word-break: break-word; flex: 1; }
+        .btn-anular-item { background: none; border: none; font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+        .btn-anular-item:hover { background-color: rgba(200, 106, 106, 0.15); }
+        .carrito-controles-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; }
+        .payment-group { display: flex; gap: 4px; }
+        .btn-pay { background-color: transparent; border: 1px solid var(--texto-principal); padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .btn-pay.selected { background-color: var(--verde-oscuro); color: var(--blanco); border-color: var(--verde-oscuro); }
 
-        .carrito-prod-titulo {
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            word-break: break-word;
-        }
+        .stock-control { display: flex; align-items: center; gap: 8px; }
+        .btn-stock { background: var(--bg-principal); border: 1px solid rgba(0,0,0,0.1); font-size: 16px; font-weight: 700; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .stock-control span { font-weight: 700; font-size: 14px; min-width: 20px; text-align: center; }
 
-        .carrito-controles-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px dashed rgba(0,0,0,0.1);
-            padding-top: 10px;
-        }
+        /* --- TABLAS RESPONSIVAS --- */
+        .tabla-toro { width: 100%; border-collapse: collapse; min-width: 650px; }
+        .tabla-toro th { text-transform: uppercase; font-size: 11px; font-weight: 700; text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(0,0,0,0.1); white-space: nowrap; }
+        .tabla-toro td { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; vertical-align: middle; }
+        
+        /* Enlace de Modificación */
+        .click-editable { cursor: pointer; text-decoration: underline dotted; color: var(--verde-oscuro); }
+        .btn-anular-reporte { background: var(--blanco); border: 1px solid var(--rojo-alerta); color: var(--rojo-alerta); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
 
-        .payment-group {
-            display: flex;
-            gap: 4px;
-        }
+        /* CARDS RESUMEN REPORTES */
+        .resumen-cards-container { display: flex; gap: 8px; margin-bottom: 15px; }
+        .card-resumen { background: var(--bg-principal); padding: 10px; border-radius: 12px; flex: 1; text-align: center; }
+        .card-resumen p { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+        .card-resumen h3 { font-size: 13px; font-weight: 700; color: var(--verde-oscuro); }
 
-        .btn-pay {
-            background-color: transparent;
-            border: 1px solid var(--texto-principal);
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-pay.selected {
-            background-color: var(--verde-oscuro);
-            color: var(--blanco);
-            border-color: var(--verde-oscuro);
-        }
-
-        /* ARREGLO DE LOS BOTONES + Y - SUPERPUESTOS */
-        .stock-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-stock {
-            background: var(--bg-principal);
-            border: 1px solid rgba(0,0,0,0.1);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stock-control span {
-            font-weight: 700;
-            font-size: 14px;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        /* --- ARREGLO CABECERA DE TABLAS COMPRIMIDAS --- */
-        .tabla-toro {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px; /* Obliga a la tabla a no aplastar las letras en el tlf */
-        }
-
-        .tabla-toro th {
-            text-transform: uppercase;
-            font-size: 11px;
-            font-weight: 700;
-            text-align: left;
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            white-space: nowrap;
-        }
-
-        .tabla-toro td {
-            padding: 12px 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 13px;
-        }
-
-        /* --- BARRA FIJA INFERIOR PARA PROCESAR VENTA --- */
+        /* --- BARRA INFERIOR DE FACTURACIÓN --- */
         .total-box {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--blanco);
-            border-top: 2px solid var(--verde-contenedor);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 2000;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--blanco); border-top: 2px solid var(--verde-contenedor);
+            padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 2000;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
         }
+        .btn-procesar-venta { background-color: var(--verde-oscuro); color: var(--blanco); border: none; padding: 12px 24px; border-radius: 15px; font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase; }
+        .total-monto { text-align: right; }
 
-        .btn-procesar-venta {
-            background-color: var(--verde-oscuro);
-            color: var(--blanco);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 15px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .total-monto {
-            text-align: right;
-        }
-
-        /* BOTONES NUEVOS */
-        .btn-primario {
-            background-color: var(--verde-oscuro);
-            color: var(--blanco);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .vacio-msg {
-            text-align: center;
-            padding: 40px 0;
-            font-style: italic;
-            opacity: 0.6;
-        }
-
-        .sync-indicator {
-            font-size: 9px;
-            font-weight: 700;
-            background: rgba(88, 114, 88, 0.1);
-            padding: 4px 8px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            margin-left: 8px;
-        }
-
-        .sync-dot {
-            width: 6px; height: 6px;
-            background-color: #587258;
-            border-radius: 50%;
-            margin-right: 4px;
-        }
-
+        .btn-primario { background-color: var(--verde-oscuro); color: var(--blanco); border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; text-transform: uppercase; font-size: 12px; }
+        .vacio-msg { text-align: center; padding: 40px 0; font-style: italic; opacity: 0.6; }
+        
+        .sync-indicator { font-size: 9px; font-weight: 700; background: rgba(88, 114, 88, 0.1); padding: 4px 8px; border-radius: 8px; display: inline-flex; align-items: center; margin-left: 8px; }
+        .sync-dot { width: 6px; height: 6px; background-color: #587258; border-radius: 50%; margin-right: 4px; }
         .sync-dot.loading { background-color: #c8a36a; animation: pulse 1s infinite alternate; }
         @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* --- ESTILOS DEL MODAL COMPLETO DE PRODUCTOS --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 3000; padding: 10px; }
+        .modal-content { background-color: var(--bg-principal); width: 100%; max-width: 400px; border-radius: var(--radio); padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-row { display: block; margin-bottom: 10px; }
+        .modal-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+        .modal-input { width: 100%; padding: 10px; border: 1px solid var(--texto-principal); border-radius: 10px; font-size: 14px; background: var(--blanco); outline: none; text-transform: uppercase; }
+        .modal-textarea { height: 50px; resize: none; text-transform: uppercase; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+        .modal-btn { background: var(--blanco); border: 1px solid var(--texto-principal); padding: 10px 15px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -382,7 +257,13 @@
         <button class="btn-menu" onclick="toggleMenu()">☰</button>
         <div class="nav-item activo" onclick="cambiarPantalla('ventas', this)">🏪 <span>Ventas</span></div>
         <div class="nav-item" onclick="cambiarPantalla('inventario', this)">📦 <span>Inventario</span></div>
-        <div class="nav-item" onclick="cambiarPantalla('reportes', this)">📈 <span>Reportes</span></div>
+        <div class="nav-item" id="nav-reportes-main" onclick="cambiarPantalla('reportes', this)">📈 <span>Reportes</span></div>
+        
+        <div id="sub-menu-reportes-container" class="sub-menu-reportes">
+            <button class="sub-nav-item activo" onclick="filtrarReporteTiempo('hoy', this)">Hoy</button>
+            <button class="sub-nav-item" onclick="filtrarReporteTiempo('semana', this)">Semana</button>
+            <button class="sub-nav-item" onclick="filtrarReporteTiempo('mes', this)">Mes</button>
+        </div>
     </nav>
 
     <main id="contenido-app">
@@ -418,16 +299,16 @@
         </section>
 
         <section id="pantalla-inventario" class="pantalla">
-            <button class="btn-primario">+ Nuevo Producto</button>
+            <button class="btn-primario" onclick="abrirModalProducto(false)">+ Nuevo Producto</button>
             <div class="caja-contenedor">
                 <table class="tabla-toro">
                     <thead>
                         <tr>
                             <th>Código</th>
-                            <th>Producto</th>
+                            <th>Producto (Modificar)</th>
                             <th>Marca</th>
                             <th>Stock</th>
-                            <th>Venta ($)</th>
+                            <th>Precio Venta</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-inventario-body"></tbody>
@@ -436,31 +317,48 @@
         </section>
 
         <section id="pantalla-reportes" class="pantalla">
+            <div class="resumen-cards-container">
+                <div class="card-resumen"><p>Bruto</p><h3 id="card-total-usd">0.00$</h3></div>
+                <div class="card-resumen"><p>Bolívares</p><h3 id="card-total-bs">0 Bs</h3></div>
+                <div class="card-resumen"><p>Transac.</p><h3 id="card-cant-ventas">0</h3></div>
+            </div>
             <div class="caja-contenedor">
                 <table class="tabla-toro">
-                    <thead>
-                        <tr>
-                            <th>Hora/Fecha</th>
-                            <th>Detalle Productos</th>
-                            <th>Monto Total</th>
-                        </tr>
-                    </thead>
+                    <thead id="tabla-reportes-header"></thead>
                     <tbody id="tabla-reportes-body"></tbody>
                 </table>
-                <div id="msg-reportes-vacio" class="vacio-msg">No hay registros hoy.</div>
+                <div id="msg-reportes-vacio" class="vacio-msg">No hay registros guardados.</div>
             </div>
         </section>
     </main>
+
+    <div id="modal-producto" class="modal">
+        <div class="modal-content">
+            <div id="modal-titulo-accion" style="font-weight:700; text-transform:uppercase; font-size:13px; text-align:center; margin-bottom:15px;">Nuevo Producto</div>
+            <div class="modal-row"><span class="modal-label">Código:</span><input type="text" id="reg-codigo" class="modal-input"></div>
+            <div class="modal-row"><span class="modal-label">Código de barras:</span><input type="text" id="reg-barras" class="modal-input"></div>
+            <div class="modal-row"><span class="modal-label">Nombre:</span><input type="text" id="reg-nombre" class="modal-input"></div>
+            <div class="modal-row"><span class="modal-label">Descripción:</span><textarea id="reg-descripcion" class="modal-input modal-textarea"></textarea></div>
+            <div class="modal-row"><span class="modal-label">Marca:</span><input type="text" id="reg-marca" class="modal-input"></div>
+            <div class="modal-row"><span class="modal-label">Precio Venta ($):</span><input type="number" id="reg-venta-usd" class="modal-input" step="0.01"></div>
+            <div class="modal-row"><span class="modal-label">Stock Actual:</span><input type="number" id="reg-stock" class="modal-input" value="0"></div>
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="cerrarModalProducto()">CANCELAR</button>
+                <button class="modal-btn" style="background:var(--verde-oscuro); color:white; border:none;" onclick="guardarProducto()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx5d9ZsEe0AEjwaE1R-uPVP5zh6g6obIALG_RE9k6t7U4PKbsZzNlbet9zEMwjcJVvi/exec";
         let cacheProductos = [];
         let cacheVentas = [];
         let carrito = [];
+        let esEdicion = false;
+        let filtroTiempoActual = 'hoy';
 
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('abierto');
-        }
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('abierto'); }
+        function getTasa() { return 700; }
 
         function setNetStatus(loading, text = "Conectado") {
             document.getElementById('net-dot').className = loading ? "sync-dot loading" : "sync-dot";
@@ -474,13 +372,10 @@
                 cacheProductos = await resProd.json();
                 let resVentas = await fetch(`${API_URL}?action=obtenerVentas`);
                 cacheVentas = await resVentas.json();
-                
                 renderizarInventario();
                 renderizarReportes();
                 setNetStatus(false, "Al día");
-            } catch (err) {
-                setNetStatus(false, "Offline");
-            }
+            } catch (err) { setNetStatus(false, "Offline"); }
         }
 
         function cambiarPantalla(pantallaId, elemento) {
@@ -489,7 +384,65 @@
             document.getElementById(`pantalla-${pantallaId}`).classList.add('activa');
             elemento.classList.add('activo');
             document.getElementById('txt-titulo-pantalla').innerText = pantallaId;
+            
+            const subMenu = document.getElementById('sub-menu-reportes-container');
+            if(pantallaId === 'reportes') subMenu.classList.add('visible');
+            else subMenu.classList.remove('visible');
             document.getElementById('sidebar').classList.remove('abierto');
+        }
+
+        function filtrarReporteTiempo(rango, boton) {
+            document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('activo'));
+            boton.classList.add('activo');
+            filtroTiempoActual = rango;
+            renderizarReportes();
+            document.getElementById('sidebar').classList.remove('abierto');
+        }
+
+        /* --- CONTROL DEL MODAL MODIFICAR COMPLETO --- */
+        function abrirModalProducto(editar = false, codigoProd = '') {
+            esEdicion = editar;
+            document.getElementById('modal-producto').style.display = 'flex';
+            if(esEdicion) {
+                document.getElementById('modal-titulo-accion').innerText = "Modificar Producto";
+                document.getElementById('reg-codigo').disabled = true;
+                let p = cacheProductos.find(item => item.codigo === codigoProd);
+                if(p) {
+                    document.getElementById('reg-codigo').value = p.codigo;
+                    document.getElementById('reg-barras').value = p.barras || '';
+                    document.getElementById('reg-nombre').value = p.nombre;
+                    document.getElementById('reg-descripcion').value = p.descripcion || '';
+                    document.getElementById('reg-marca').value = p.marca || '';
+                    document.getElementById('reg-venta-usd').value = p.venta_usd;
+                    document.getElementById('reg-stock').value = p.stock;
+                }
+            } else {
+                document.getElementById('modal-titulo-accion').innerText = "Nuevo Producto";
+                document.getElementById('reg-codigo').disabled = false;
+                document.querySelectorAll('.modal-content input, .modal-content textarea').forEach(i => i.value = '');
+                document.getElementById('reg-stock').value = 0;
+            }
+        }
+
+        function cerrarModalProducto() { document.getElementById('modal-producto').style.display = 'none'; }
+
+        async function guardarProducto() {
+            let prod = {
+                codigo: document.getElementById('reg-codigo').value.toUpperCase().trim(),
+                barras: document.getElementById('reg-barras').value.trim(),
+                nombre: document.getElementById('reg-nombre').value.toUpperCase().trim(),
+                descripcion: document.getElementById('reg-descripcion').value.trim(),
+                marca: document.getElementById('reg-marca').value.toUpperCase().trim(),
+                venta_usd: parseFloat(document.getElementById('reg-venta-usd').value || 0),
+                stock: parseInt(document.getElementById('reg-stock').value || 0)
+            };
+            if(!prod.codigo || !prod.nombre) return alert("Código y Nombre obligatorios");
+            cerrarModalProducto();
+            setNetStatus(true);
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "guardarProducto", producto: prod }) });
+                sincronizarTodo(true);
+            } catch(e) { setNetStatus(false, "Error Guardado"); }
         }
 
         function renderizarInventario() {
@@ -499,7 +452,7 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><small>${p.codigo}</small></td>
-                        <td><strong>${p.nombre}</strong></td>
+                        <td><strong class="click-editable" onclick="abrirModalProducto(true, '${p.codigo}')">${p.nombre}</strong></td>
                         <td>${p.marca}</td>
                         <td>
                             <div class="stock-control">
@@ -549,7 +502,7 @@
 
         function cambiarCantidadCarrito(idx, cambio) {
             carrito[idx].cantidad += cambio;
-            if(carrito[idx].cantidad <= 0) carrito.splice(idx, 1);
+            if(carrito[idx].cantidad <= 0) { if(confirm("¿Quitar producto?")) carrito.splice(idx, 1); else carrito[idx].cantidad = 1; }
             renderizarCarrito();
         }
 
@@ -565,7 +518,9 @@
             carrito.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="carrito-item-card">
-                        <div class="carrito-prod-titulo">${item.nombre} - ${(item.precio * item.cantidad).toFixed(2)}$</div>
+                        <div class="carrito-header-row">
+                            <div class="carrito-prod-titulo">${item.nombre} - ${(item.precio * item.cantidad).toFixed(2)}$</div>
+                        </div>
                         <div class="carrito-controles-row">
                             <div class="payment-group">
                                 <button class="btn-pay ${item.pago === 'Bs' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'Bs')">Bs</button>
@@ -586,7 +541,7 @@
         function actualizarTotalesCaja() {
             let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
             document.getElementById('total-usd').innerText = `${total.toFixed(2)}$`;
-            document.getElementById('total-bs').innerText = `${(total * 700).toLocaleString('es-VE')} Bs`;
+            document.getElementById('total-bs').innerText = `${(total * getTasa()).toLocaleString('es-VE')} Bs`;
         }
 
         async function procesarVentaCierre() {
@@ -596,21 +551,72 @@
             carrito = []; renderizarCarrito();
             setNetStatus(true);
             try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "procesarVenta", items: copia, total_usd: total, tasa_applied: 700 }) });
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "procesarVenta", items: copia, total_usd: total, tasa_applied: getTasa() }) });
                 sincronizarTodo(true);
-            } catch(e) { setNetStatus(false, "Error"); }
+            } catch(e) { setNetStatus(false, "Error Guardando"); }
         }
 
+        /* --- RESTAURACIÓN TOTAL DE LA ANULACIÓN DESDE REPORTES --- */
         function renderizarReportes() {
+            let thead = document.getElementById('tabla-reportes-header');
             let tbody = document.getElementById('tabla-reportes-body');
             let msg = document.getElementById('msg-reportes-vacio');
             tbody.innerHTML = '';
-            if(cacheVentas.length === 0) { msg.style.display = 'block'; return; }
-            msg.style.display = 'none';
-            [...cacheVentas].reverse().forEach(v => {
-                let f = new Date(v.fecha).toLocaleDateString();
-                tbody.innerHTML += `<tr><td><strong>${f}</strong></td><td><small>Venta General</small></td><td><strong>${parseFloat(v.total_usd).toFixed(2)}$</strong></td></tr>`;
+            
+            if(filtroTiempoActual === 'hoy') {
+                thead.innerHTML = `<tr><th>Hora</th><th>Vendido</th><th>Monto</th><th>Acción</th></tr>`;
+            } else {
+                thead.innerHTML = `<tr><th>Fecha</th><th>Detalle</th><th>Monto</th></tr>`;
+            }
+
+            let ahora = new Date(), totalUSD = 0, trans = 0, hayDatos = false;
+            let ordenadas = [...cacheVentas].reverse();
+
+            ordenadas.forEach(v => {
+                let fv = new Date(v.fecha), cumple = false;
+                if(filtroTiempoActual === 'hoy') cumple = fv.toDateString() === ahora.toDateString();
+                else if(filtroTiempoActual === 'semana') { let s7 = new Date(); s7.setDate(ahora.getDate() - 7); cumple = fv >= s7; }
+                else if(filtroTiempoActual === 'mes') cumple = fv.getMonth() === ahora.getMonth() && fv.getFullYear() === ahora.getFullYear();
+
+                if(cumple) {
+                    hayDatos = true;
+                    let t_usd = parseFloat(v.total_usd);
+                    totalUSD += t_usd;
+                    trans++;
+
+                    let itemsObj = [];
+                    try { itemsObj = JSON.parse(v.items); } catch(e) { itemsObj = v.items || []; }
+                    let listaNombres = itemsObj.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
+
+                    if(filtroTiempoActual === 'hoy') {
+                        let horaStr = fv.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${horaStr}</strong></td>
+                                <td><small>${listaNombres}</small></td>
+                                <td><strong>${t_usd.toFixed(2)}$</strong></td>
+                                <td><button class="btn-anular-reporte" onclick="anularVentaNube(${v.id})">Anular</button></td>
+                            </tr>`;
+                    } else {
+                        let fechaStr = fv.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit' });
+                        tbody.innerHTML += `<tr><td><strong>${fechaStr}</strong></td><td><small>${listaNombres}</small></td><td><strong>${t_usd.toFixed(2)}$</strong></td></tr>`;
+                    }
+                }
             });
+
+            msg.style.display = hayDatos ? 'none' : 'block';
+            document.getElementById('card-total-usd').innerText = `${totalUSD.toFixed(2)}$`;
+            document.getElementById('card-total-bs').innerText = `${(totalUSD * getTasa()).toLocaleString('es-VE', {maximumFractionDigits: 0})} Bs`;
+            document.getElementById('card-cant-ventas').innerText = trans;
+        }
+
+        async function anularVentaNube(idVenta) {
+            if(!confirm("¿Estás seguro de que deseas eliminar y anular permanentemente esta venta en la nube? El stock se devolverá.")) return;
+            setNetStatus(true);
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "anularVenta", idVenta: idVenta }) });
+                sincronizarTodo(true);
+            } catch(e) { setNetStatus(false, "Error Red"); }
         }
 
         window.onload = function() { sincronizarTodo(); };
