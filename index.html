@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Toro - Sistema de Ventas Móvil Ultra-Rápido</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toro - Sistema de Ventas Móvil</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -28,34 +28,32 @@
             color: var(--texto-principal);
         }
 
+        /* CORRECCIÓN CENTRAL: Permitir scroll vertical real en el teléfono */
         body {
             background-color: var(--blanco);
-            height: 100vh;
-            display: block;
+            min-height: 100vh;
+            overflow-y: auto; 
             position: relative;
-            overflow: hidden;
+            padding-bottom: 80px; /* Espacio de seguridad para que el botón de procesar venta no tape nada */
         }
 
-        /* --- MENÚ LATERAL (RESPONSIVO TOTAL) --- */
+        /* --- MENÚ LATERAL MEJORADO PARA MÓVIL --- */
         #sidebar {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 70px;
+            width: 60px;
             background-color: var(--verde-contenedor);
             height: 100vh;
             border-top-right-radius: var(--radio);
             border-bottom-right-radius: var(--radio);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: block;
+            transition: width 0.3s ease;
             padding-top: 20px;
-            z-index: 100;
-            box-shadow: 4px 0px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
         }
 
         #sidebar.abierto {
-            width: 240px;
-            padding-left: 15px;
+            width: 200px;
         }
 
         .btn-menu {
@@ -68,27 +66,22 @@
             width: 100%;
             text-align: center;
         }
-        #sidebar.abierto .btn-menu {
-            text-align: left;
-            padding-left: 15px;
-        }
 
         .nav-item {
             display: block;
             white-space: nowrap;
             overflow: hidden;
-            padding: 18px 20px;
+            padding: 15px;
             cursor: pointer;
-            border-radius: 15px 0 0 15px;
             margin-bottom: 5px;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .nav-item span {
             display: inline-block;
-            margin-left: 15px;
+            margin-left: 10px;
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -99,144 +92,80 @@
 
         .nav-item.activo {
             background-color: var(--bg-principal);
+            border-radius: 10px 0 0 10px;
         }
 
-        /* --- SUB-MENÚ REPORTES --- */
-        .sub-menu-reportes {
-            display: none;
-            width: 100%;
-            padding-left: 10px;
-            margin-top: 5px;
-        }
-
-        #sidebar.abierto .sub-menu-reportes.visible {
-            display: block;
-        }
-
-        .sub-nav-item {
-            background-color: var(--blanco);
-            border: none;
-            padding: 12px 15px;
-            border-radius: 12px 0 0 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 12px;
-            cursor: pointer;
-            text-align: left;
-            width: 100%;
-            margin-bottom: 5px;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .sub-nav-item:hover, .sub-nav-item.activo {
-            background-color: var(--verde-oscuro);
-            color: var(--blanco);
-        }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
+        /* --- CONTENEDOR DE LA APP (YA NO ESTÁ CONGELADO) --- */
         #contenido-app {
-            position: absolute;
-            top: 0;
-            left: 70px;
-            right: 0;
-            height: 100vh;
-            background-color: var(--blanco);
-            display: block;
+            margin-left: 65px;
             padding: 15px;
-            overflow: hidden;
-            transition: left 0.3s ease;
+            min-height: 100vh;
         }
 
         .header-app {
-            display: block;
-            margin-bottom: 15px;
-            position: relative;
-            height: 40px;
-        }
-
-        .titulo-container {
-            display: inline-block;
-            vertical-align: middle;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         .titulo-pantalla {
             font-size: 20px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
         }
 
         .tasa-box {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             background: var(--bg-principal);
-            padding: 5px 12px;
+            padding: 6px 12px;
             border-radius: 12px;
             cursor: pointer;
         }
 
-        /* --- PESTAÑAS Y CONTENEDORES --- */
+        /* --- PESTAÑAS --- */
         .pantalla {
             display: none;
-            height: calc(100vh - 75px);
-            position: relative;
         }
 
         .pantalla.activa {
             display: block;
         }
 
+        /* CAJA VERDE CONTENEDORA (Con scroll propio si se necesita) */
         .caja-contenedor {
             background-color: var(--bg-principal);
             border-radius: var(--radio);
             padding: 15px;
-            height: calc(100% - 65px);
-            overflow-y: auto;
-            position: relative;
-            display: block;
-        }
-
-        #pantalla-inventario .caja-contenedor,
-        #pantalla-reportes .caja-contenedor {
-            height: calc(100% - 55px);
-            overflow-x: auto; /* Permite scroll horizontal suave si no cabe en pantallas mini */
+            margin-bottom: 20px;
+            overflow-x: auto; /* Scroll horizontal si las tablas son muy anchas */
         }
 
         /* --- BARRA DE BÚSQUEDA --- */
         .buscador-container {
-            display: block;
+            display: flex;
             background: var(--blanco);
             border: 1px solid var(--texto-principal);
             border-radius: 15px;
             margin-bottom: 15px;
             height: 45px;
-            position: relative;
+            overflow: hidden;
         }
 
         .search-badge {
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 85px;
             background-color: var(--verde-contenedor);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 10px;
-            letter-spacing: 0.5px;
+            padding: 0 10px;
             border-right: 1px solid var(--texto-principal);
-            border-top-left-radius: 13px;
-            border-bottom-left-radius: 13px;
         }
 
         .buscador-input {
-            position: absolute;
-            left: 85px; right: 50px; top: 0; bottom: 0;
-            width: calc(100% - 135px);
+            flex: 1;
             border: none;
             padding: 0 10px;
             font-size: 14px;
@@ -245,30 +174,22 @@
         }
 
         .btn-qr {
-            position: absolute;
-            right: 0; top: 0; bottom: 0;
             width: 50px;
             background-color: var(--verde-contenedor);
             border: none;
             border-left: 1px solid var(--texto-principal);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-top-right-radius: 13px;
-            border-bottom-right-radius: 13px;
             font-size: 18px;
         }
 
-        /* --- RESULTADOS DE BÚSQUEDA FLOTANTE --- */
+        /* RESULTADOS BÚSQUEDA FLOTANTE */
         .resultados-busqueda {
             position: absolute;
-            top: 47px;
-            left: 0; right: 0;
             background: var(--blanco);
             border: 1px solid var(--texto-principal);
             border-radius: 10px;
-            z-index: 200;
+            z-index: 2000;
+            width: calc(100% - 100px);
             max-height: 200px;
             overflow-y: auto;
             display: none;
@@ -276,90 +197,51 @@
         }
 
         .resultado-item {
-            padding: 14px 15px;
+            padding: 12px;
             cursor: pointer;
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: block;
-            position: relative;
+            display: flex;
+            justify-content: space-between;
         }
 
-        .resultado-item span {
-            display: block;
-            font-size: 13px;
-            width: calc(100% - 70px);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .resultado-item strong {
-            position: absolute;
-            right: 15px;
-            top: 14px;
-            font-size: 14px;
-            color: var(--verde-oscuro);
-        }
-
-        .resultado-item:hover, .resultado-item.seleccionado-teclado {
-            background-color: var(--bg-principal);
-        }
-
-        /* --- REDISEÑO DEL CARRITO EN MÓVIL (ESTILO TARJETAS) --- */
+        /* --- REESTRUCTURACIÓN COMPLETA DEL CARRITO EN MÓVIL --- */
         .carrito-item-card {
             background: var(--blanco);
             border-radius: 15px;
-            padding: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            display: block;
-            position: relative;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .carrito-prod-titulo {
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 8px;
-            width: calc(100% - 70px);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .carrito-prod-precio {
-            position: absolute;
-            right: 12px;
-            top: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--verde-oscuro);
+            margin-bottom: 10px;
+            word-break: break-word;
         }
 
         .carrito-controles-row {
-            display: block;
-            margin-top: 12px;
-            border-top: 1px dashed rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed rgba(0,0,0,0.1);
             padding-top: 10px;
-            position: relative;
-            height: 35px;
         }
 
-        /* --- BOTONES MÉTODO DE PAGO --- */
         .payment-group {
-            display: inline-block;
-            vertical-align: middle;
+            display: flex;
+            gap: 4px;
         }
 
         .btn-pay {
             background-color: transparent;
             border: 1px solid var(--texto-principal);
-            padding: 5px 12px;
-            border-radius: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
             font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            margin-right: 3px;
-            display: inline-block;
         }
 
         .btn-pay.selected {
@@ -368,12 +250,11 @@
             border-color: var(--verde-oscuro);
         }
 
-        /* --- BOTONES STOCK Y ACCIONES --- */
+        /* ARREGLO DE LOS BOTONES + Y - SUPERPUESTOS */
         .stock-control {
-            display: inline-block;
-            position: absolute;
-            right: 0;
-            top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-stock {
@@ -385,28 +266,23 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            display: inline-block;
-            text-align: center;
-            line-height: 28px;
-            user-select: none;
-            vertical-align: middle;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .stock-control span {
-            display: inline-block;
-            width: 25px;
-            text-align: center;
             font-weight: 700;
             font-size: 14px;
-            vertical-align: middle;
+            min-width: 20px;
+            text-align: center;
         }
 
-
-        /* --- TABLAS TRADICIONALES (INVENTARIO Y REPORTES) --- */
+        /* --- ARREGLO CABECERA DE TABLAS COMPRIMIDAS --- */
         .tabla-toro {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 600px; /* Obliga a la tabla a no aplastar las letras en el tlf */
         }
 
         .tabla-toro th {
@@ -414,11 +290,8 @@
             font-size: 11px;
             font-weight: 700;
             text-align: left;
-            padding: 10px 8px 12px 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            background: var(--bg-principal);
             white-space: nowrap;
         }
 
@@ -426,265 +299,126 @@
             padding: 12px 8px;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             font-size: 13px;
-            vertical-align: middle;
         }
 
-        .click-editable {
-            cursor: pointer;
-            text-decoration: underline dotted;
-        }
-
-        /* --- CARDS DE RESUMEN REPORTES --- */
-        .resumen-cards-container {
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .card-resumen {
-            background: var(--bg-principal);
-            padding: 12px;
-            border-radius: 15px;
-            display: inline-block;
-            width: calc(33% - 6px);
-            margin-right: 5px;
-            text-align: center;
-            vertical-align: top;
-        }
-        .card-resumen:last-child { margin-right: 0; }
-
-        .card-resumen p {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            opacity: 0.7;
-            margin-bottom: 3px;
-        }
-
-        .card-resumen h3 {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--verde-oscuro);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* --- BOTONES GENERALES --- */
-        .btn-primario {
-            background-color: var(--verde-oscuro);
-            color: var(--blanco);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: block;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-size: 12px;
-            text-align: center;
-            width: auto;
-        }
-
-        .actions-group {
-            display: block;
-        }
-
-        .btn-accion-tabla {
-            background-color: var(--blanco);
-            border: 1px solid var(--texto-principal);
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-right: 4px;
-            display: inline-block;
-        }
-
-        .vacio-msg {
-            text-align: center;
-            margin-top: 30px;
-            font-style: italic;
-            opacity: 0.6;
-            font-size: 14px;
-        }
-
-        /* --- TOTALES Y FIJACIÓN EN LA PARTE INFERIOR DE CAJA --- */
+        /* --- BARRA FIJA INFERIOR PARA PROCESAR VENTA --- */
         .total-box {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: var(--blanco);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 12px 15px;
-            height: 70px;
-            display: block;
+            border-top: 2px solid var(--verde-contenedor);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2000;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
         }
 
         .btn-procesar-venta {
             background-color: var(--verde-oscuro);
             color: var(--blanco);
             border: none;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border-radius: 15px;
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
             text-transform: uppercase;
-            display: inline-block;
-            vertical-align: middle;
         }
 
         .total-monto {
-            float: right;
             text-align: right;
-            display: inline-block;
-            vertical-align: middle;
         }
 
-        /* --- INDICADOR DE RED --- */
+        /* BOTONES NUEVOS */
+        .btn-primario {
+            background-color: var(--verde-oscuro);
+            color: var(--blanco);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .vacio-msg {
+            text-align: center;
+            padding: 40px 0;
+            font-style: italic;
+            opacity: 0.6;
+        }
+
         .sync-indicator {
             font-size: 9px;
             font-weight: 700;
-            background: rgba(88, 114, 88, 0.12);
-            padding: 3px 8px;
+            background: rgba(88, 114, 88, 0.1);
+            padding: 4px 8px;
             border-radius: 8px;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             margin-left: 8px;
-            text-transform: uppercase;
-            vertical-align: middle;
         }
+
         .sync-dot {
             width: 6px; height: 6px;
             background-color: #587258;
             border-radius: 50%;
-            display: inline-block;
             margin-right: 4px;
-            vertical-align: middle;
         }
-        .sync-dot.loading {
-            background-color: #c8a36a;
-            animation: pulse 1s infinite alternate;
-        }
+
+        .sync-dot.loading { background-color: #c8a36a; animation: pulse 1s infinite alternate; }
         @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        /* --- TOAST NOTIFICACIÓN --- */
-        #toast-notificacion {
-            position: fixed;
-            bottom: -100px;
-            left: 15px; right: 15px;
-            background-color: var(--texto-principal);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
-            transition: bottom 0.3s ease;
-            z-index: 1000;
-            text-align: center;
-        }
-
-        #toast-notificacion.visible { bottom: 15px; }
-        #toast-notificacion span { color: var(--blanco); font-weight: 600; font-size: 13px; text-transform: uppercase; }
-
-        /* --- MODALES --- */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 10px;
-        }
-
-        .modal-content {
-            background-color: var(--bg-principal);
-            width: 100%;
-            max-width: 420px;
-            border-radius: var(--radio);
-            padding: 20px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-row { display: block; margin-bottom: 10px; }
-        .modal-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
-        .modal-input { width: 100%; padding: 10px; border: 1px solid var(--texto-principal); border-radius: 10px; font-size: 14px; background: var(--blanco); outline: none; }
-        .modal-textarea { height: 50px; resize: none; }
-        .modal-actions { display: block; margin-top: 15px; text-align: right; }
-        .modal-btn { background: var(--blanco); border: 1px solid var(--texto-principal); padding: 10px 15px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; margin-left: 5px; }
-
-        /* --- RESPONSIVIDAD ADICIONAL (PANTALLAS GRANDES) --- */
-        @media (min-width: 768px) {
-            #sidebar.abierto ~ #contenido-app { left: 240px; }
-            .carrito-item-card { display: table-row; background: transparent; box-shadow: none; }
-            .carrito-prod-titulo { display: table-cell; padding: 12px 0; }
-            .carrito-prod-precio { display: table-cell; position: static; padding: 12px 0; }
-            .carrito-controles-row { display: table-cell; border: none; padding: 0; position: static; }
-            .stock-control { position: static; display: inline-block; }
-        }
     </style>
 </head>
 <body>
 
     <nav id="sidebar">
         <button class="btn-menu" onclick="toggleMenu()">☰</button>
-        <div class="nav-item activo" onclick="cambiarPantalla('ventas', this)">
-            🏪 <span>Ventas</span>
-        </div>
-        <div class="nav-item" onclick="cambiarPantalla('inventario', this)">
-            📦 <span>Inventario</span>
-        </div>
-        <div class="nav-item" id="nav-reportes-main" onclick="cambiarPantalla('reportes', this)">
-            📈 <span>Reportes</span>
-        </div>
-        
-        <div id="sub-menu-reportes-container" class="sub-menu-reportes">
-            <button class="sub-nav-item activo" onclick="filtrarReporteTiempo('hoy', this)">Hoy</button>
-            <button class="sub-nav-item" onclick="filtrarReporteTiempo('semana', this)">Semana</button>
-            <button class="sub-nav-item" onclick="filtrarReporteTiempo('mes', this)">Mes</button>
-        </div>
+        <div class="nav-item activo" onclick="cambiarPantalla('ventas', this)">🏪 <span>Ventas</span></div>
+        <div class="nav-item" onclick="cambiarPantalla('inventario', this)">📦 <span>Inventario</span></div>
+        <div class="nav-item" onclick="cambiarPantalla('reportes', this)">📈 <span>Reportes</span></div>
     </nav>
 
     <main id="contenido-app">
         <header class="header-app">
-            <div class="titulo-container">
+            <div>
                 <h1 id="txt-titulo-pantalla" class="titulo-pantalla">Ventas</h1>
                 <div class="sync-indicator">
                     <div id="net-dot" class="sync-dot"></div>
                     <span id="net-text">Conectado</span>
                 </div>
             </div>
-            <div class="tasa-box" onclick="cambiarTasaManual()">
-                1$ = <span id="lbl-tasa-actual">700,00</span>
-            </div>
+            <div class="tasa-box" onclick="cambiarTasaManual()">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
         </header>
 
         <section id="pantalla-ventas" class="pantalla activa">
             <div class="buscador-container">
-                <div class="search-badge">PRODUCTO</div>
-                <input type="text" id="input-buscar-venta" class="buscador-input" placeholder="BUSCAR NOMBRE O CÓDIGO..." oninput="filtrarBusquedaVenta(this.value)" onkeydown="manejarTecladoBuscador(event)" autocomplete="off">
+                <div class="search-badge">PROD</div>
+                <input type="text" id="input-buscar-venta" class="buscador-input" placeholder="BUSCAR REPUESTO..." oninput="filtrarBusquedaVenta(this.value)" autocomplete="off">
                 <button class="btn-qr">📷</button>
-                <div id="box-resultados" class="resultados-busqueda"></div>
             </div>
+            <div id="box-resultados" class="resultados-busqueda"></div>
 
-            <div class="caja-contenedor" style="height: calc(100% - 135px);" id="lista-carrito-contenedor">
-                <div id="lista-carrito"></div>
-                <div id="msg-carrito-vacio" class="vacio-msg">La caja está vacía. Busca un repuesto arriba.</div>
-            </div>
+            <div id="lista-carrito"></div>
+            <div id="msg-carrito-vacio" class="vacio-msg">El carrito está vacío. Busca un repuesto arriba.</div>
             
             <div class="total-box">
                 <button class="btn-procesar-venta" onclick="procesarVentaCierre()">Procesar Venta</button>
                 <div class="total-monto">
-                    <div style="font-size: 20px; font-weight:700;" id="total-usd">0$</div>
-                    <div style="font-size: 12px; font-weight: 400; opacity:0.8;" id="total-bs">0,00Bs</div>
+                    <div style="font-size: 20px; font-weight:700;" id="total-usd">0.00$</div>
+                    <div style="font-size: 11px; opacity:0.8;" id="total-bs">0,00 Bs</div>
                 </div>
             </div>
         </section>
 
         <section id="pantalla-inventario" class="pantalla">
-            <button class="btn-primario" onclick="abrirModalProducto(false)">+ Nuevo Producto</button>
+            <button class="btn-primario">+ Nuevo Producto</button>
             <div class="caja-contenedor">
                 <table class="tabla-toro">
                     <thead>
@@ -694,7 +428,6 @@
                             <th>Marca</th>
                             <th>Stock</th>
                             <th>Venta ($)</th>
-                            <th>Compra ($)</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-inventario-body"></tbody>
@@ -703,79 +436,35 @@
         </section>
 
         <section id="pantalla-reportes" class="pantalla">
-            <div class="resumen-cards-container">
-                <div class="card-resumen"><p>Total Bruto</p><h3 id="card-total-usd">0.00$</h3></div>
-                <div class="card-resumen"><p>Bolívares</p><h3 id="card-total-bs">0.00 Bs</h3></div>
-                <div class="card-resumen"><p>Transac.</p><h3 id="card-cant-ventas">0</h3></div>
-            </div>
-
             <div class="caja-contenedor">
                 <table class="tabla-toro">
-                    <thead id="tabla-reportes-header"></thead>
+                    <thead>
+                        <tr>
+                            <th>Hora/Fecha</th>
+                            <th>Detalle Productos</th>
+                            <th>Monto Total</th>
+                        </tr>
+                    </thead>
                     <tbody id="tabla-reportes-body"></tbody>
                 </table>
-                <div id="msg-reportes-vacio" class="vacio-msg">No se han registrado movimientos.</div>
+                <div id="msg-reportes-vacio" class="vacio-msg">No hay registros hoy.</div>
             </div>
         </section>
     </main>
 
-    <div id="modal-producto" class="modal">
-        <div class="modal-content">
-            <div id="modal-titulo-accion" style="font-weight:700; text-transform:uppercase; font-size:14px; text-align:center; margin-bottom:15px;">Nuevo Producto</div>
-            
-            <div class="modal-row"><span class="modal-label">Código:</span><input type="text" id="reg-codigo" class="modal-input"></div>
-            <div class="modal-row"><span class="modal-label">Código de barras:</span><input type="text" id="reg-barras" class="modal-input"></div>
-            <div class="modal-row"><span class="modal-label">Nombre:</span><input type="text" id="reg-nombre" class="modal-input"></div>
-            <div class="modal-row"><span class="modal-label">Descripción:</span><textarea id="reg-descripcion" class="modal-input modal-textarea"></textarea></div>
-            <div class="modal-row"><span class="modal-label">Marca:</span><input type="text" id="reg-marca" class="modal-input"></div>
-            <div class="modal-row"><span class="modal-label">Precio Compra ($):</span><input type="number" id="reg-compra-usd" class="modal-input" oninput="calcularPreciosBs('compra', this.value)"></div>
-            <div class="modal-row"><span class="modal-label">Precio Compra (Bs):</span><input type="number" id="reg-compra-bs" class="modal-input" disabled></div>
-            <div class="modal-row"><span class="modal-label">Precio Venta ($):</span><input type="number" id="reg-venta-usd" class="modal-input" oninput="calcularPreciosBs('venta', this.value)"></div>
-            <div class="modal-row"><span class="modal-label">Precio Venta (Bs):</span><input type="number" id="reg-venta-bs" class="modal-input" disabled></div>
-            <div class="modal-row"><span class="modal-label">Stock Actual:</span><input type="number" id="reg-stock" class="modal-input" value="0"></div>
-            
-            <div class="modal-actions">
-                <button class="modal-btn" onclick="cerrarModalProducto()">CANCELAR</button>
-                <button class="modal-btn" style="background:var(--verde-oscuro); color:white; border:none;" onclick="guardarProducto()">ACEPTAR</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast-notificacion">
-        <span>Operación Exitosa</span>
-    </div>
-
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx5d9ZsEe0AEjwaE1R-uPVP5zh6g6obIALG_RE9k6t7U4PKbsZzNlbet9zEMwjcJVvi/exec";
-
         let cacheProductos = [];
         let cacheVentas = [];
         let carrito = [];
-        let esEdicion = false;
-        let filtroTiempoActual = 'hoy';
-        let indexSeleccionadoTeclado = -1;
-        let listaCodigosVisibles = [];
 
-        function setNetStatus(loading, text = "Conectado") {
-            const dot = document.getElementById('net-dot');
-            const lbl = document.getElementById('net-text');
-            if (loading) {
-                dot.classList.add('loading');
-                lbl.innerText = "Sincronizando...";
-            } else {
-                dot.classList.remove('loading');
-                lbl.innerText = text;
-            }
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('abierto');
         }
 
-        function toggleMenu() { 
-            const sidebar = document.getElementById('sidebar');
-            const contenido = document.getElementById('contenido-app');
-            sidebar.classList.toggle('abierto');
-            if(window.innerWidth >= 768) {
-                if(sidebar.classList.contains('abierto')) contenido.style.left = "240px";
-                else contenido.style.left = "70px";
-            }
+        function setNetStatus(loading, text = "Conectado") {
+            document.getElementById('net-dot').className = loading ? "sync-dot loading" : "sync-dot";
+            document.getElementById('net-text').innerText = text;
         }
 
         async function sincronizarTodo(silencioso = false) {
@@ -783,7 +472,6 @@
             try {
                 let resProd = await fetch(`${API_URL}?action=obtenerProductos`);
                 cacheProductos = await resProd.json();
-                
                 let resVentas = await fetch(`${API_URL}?action=obtenerVentas`);
                 cacheVentas = await resVentas.json();
                 
@@ -791,7 +479,6 @@
                 renderizarReportes();
                 setNetStatus(false, "Al día");
             } catch (err) {
-                console.error(err);
                 setNetStatus(false, "Offline");
             }
         }
@@ -799,107 +486,10 @@
         function cambiarPantalla(pantallaId, elemento) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('activo'));
-            
             document.getElementById(`pantalla-${pantallaId}`).classList.add('activa');
             elemento.classList.add('activo');
             document.getElementById('txt-titulo-pantalla').innerText = pantallaId;
-            
-            if(window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.remove('abierto');
-            }
-
-            const subMenu = document.getElementById('sub-menu-reportes-container');
-            if(pantallaId === 'reportes') {
-                subMenu.classList.add('visible');
-                renderizarReportes();
-            } else {
-                subMenu.classList.remove('visible');
-            }
-        }
-
-        function filtrarReporteTiempo(rango, boton) {
-            document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('activo'));
-            boton.classList.add('activo');
-            filtroTiempoActual = rango;
-            renderizarReportes();
-            if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('abierto');
-        }
-
-        function cambiarTasaManual() {
-            let nuevaTasa = prompt("Nueva tasa ($):", document.getElementById('lbl-tasa-actual').innerText);
-            if(nuevaTasa) {
-                document.getElementById('lbl-tasa-actual').innerText = parseFloat(nuevaTasa).toFixed(2);
-                localStorage.setItem('toro_tasa', nuevaTasa);
-                actualizarTotalesCaja();
-                renderizarReportes();
-            }
-        }
-        function getTasa() { return parseFloat(localStorage.getItem('toro_tasa') || 700); }
-
-        function lanzarToast(mensaje) {
-            const toast = document.getElementById('toast-notificacion');
-            toast.querySelector('span').innerText = mensaje;
-            toast.classList.add('visible');
-            setTimeout(() => { toast.classList.remove('visible'); }, 2500);
-        }
-
-        function calcularPreciosBs(tipo, val) {
-            let tasa = getTasa();
-            let inputBs = document.getElementById(`reg-${tipo}-bs`);
-            if(inputBs) inputBs.value = (parseFloat(val || 0) * tasa).toFixed(2);
-        }
-
-        function abrirModalProducto(editar = false, codigoProd = '') {
-            esEdicion = editar;
-            document.getElementById('modal-producto').style.display = 'flex';
-            if(esEdicion) {
-                document.getElementById('modal-titulo-accion').innerText = "Modificar Producto";
-                document.getElementById('reg-codigo').disabled = true;
-                let p = cacheProductos.find(item => item.codigo === codigoProd);
-                if(p) {
-                    document.getElementById('reg-codigo').value = p.codigo;
-                    document.getElementById('reg-barras').value = p.barras || '';
-                    document.getElementById('reg-nombre').value = p.nombre;
-                    document.getElementById('reg-descripcion').value = p.descripcion || '';
-                    document.getElementById('reg-marca').value = p.marca || '';
-                    document.getElementById('reg-compra-usd').value = p.compra_usd;
-                    document.getElementById('reg-venta-usd').value = p.venta_usd;
-                    document.getElementById('reg-stock').value = p.stock;
-                    calcularPreciosBs('compra', p.compra_usd);
-                    calcularPreciosBs('venta', p.venta_usd);
-                }
-            } else {
-                document.getElementById('modal-titulo-accion').innerText = "Nuevo Producto";
-                document.getElementById('reg-codigo').disabled = false;
-                document.querySelectorAll('.modal-content input, .modal-content textarea').forEach(i => i.value = '');
-                document.getElementById('reg-stock').value = 0;
-            }
-        }
-
-        function cerrarModalProducto() { document.getElementById('modal-producto').style.display = 'none'; }
-
-        async function guardarProducto() {
-            let prod = {
-                codigo: document.getElementById('reg-codigo').value.toUpperCase().trim(),
-                barras: document.getElementById('reg-barras').value.trim(),
-                nombre: document.getElementById('reg-nombre').value.toUpperCase().trim(),
-                descripcion: document.getElementById('reg-descripcion').value.trim(),
-                marca: document.getElementById('reg-marca').value.toUpperCase().trim(),
-                compra_usd: parseFloat(document.getElementById('reg-compra-usd').value || 0),
-                venta_usd: parseFloat(document.getElementById('reg-venta-usd').value || 0),
-                stock: parseInt(document.getElementById('reg-stock').value || 0)
-            };
-            if(!prod.codigo || !prod.nombre) return alert("Código y Nombre requeridos");
-            cerrarModalProducto();
-            let idx = cacheProductos.findIndex(item => item.codigo === prod.codigo);
-            if(idx > -1) cacheProductos[idx] = prod; else cacheProductos.push(prod);
-            renderizarInventario();
-            setNetStatus(true);
-            try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "guardarProducto", producto: prod }) });
-                lanzarToast("Guardado en la nube");
-                sincronizarTodo(true);
-            } catch(e) { lanzarToast("Error de Red temporal"); }
+            document.getElementById('sidebar').classList.remove('abierto');
         }
 
         function renderizarInventario() {
@@ -909,7 +499,7 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><small>${p.codigo}</small></td>
-                        <td><strong class="click-editable" onclick="abrirModalProducto(true, '${p.codigo}')">${p.nombre}</strong></td>
+                        <td><strong>${p.nombre}</strong></td>
                         <td>${p.marca}</td>
                         <td>
                             <div class="stock-control">
@@ -919,7 +509,6 @@
                             </div>
                         </td>
                         <td><strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong></td>
-                        <td>${parseFloat(p.compra_usd).toFixed(2)}$</td>
                     </tr>`;
             });
         }
@@ -929,49 +518,23 @@
             if(p) { p.stock = Math.max(0, p.stock + cambio); renderizarInventario(); }
             try {
                 await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "modificarStock", codigo: codigo, cambio: cambio }) });
-            } catch(e) { setNetStatus(false, "Error de red"); }
+            } catch(e) { setNetStatus(false, "Error"); }
         }
 
         function filtrarBusquedaVenta(query) {
             let box = document.getElementById('box-resultados');
             if(!query.trim()) { box.style.display = 'none'; return; }
-            box.innerHTML = ''; listaCodigosVisibles = []; indexSeleccionadoTeclado = -1;
-            let count = 0;
+            box.innerHTML = '';
             let txt = query.toUpperCase();
             cacheProductos.forEach(p => {
                 if(p.nombre.includes(txt) || p.codigo.includes(txt)) {
                     box.style.display = 'block';
-                    listaCodigosVisibles.push(p.codigo);
                     box.innerHTML += `
-                        <div class="resultado-item" id="item-busqueda-${count}" onmousedown="agregarAlCarrito('${p.codigo}')">
-                            <span>${p.nombre} (${p.marca}) - Stock: ${p.stock}</span>
+                        <div class="resultado-item" onclick="agregarAlCarrito('${p.codigo}')">
+                            <span>${p.nombre} (${p.marca})</span>
                             <strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong>
                         </div>`;
-                    count++;
                 }
-            });
-            if(count === 0) box.style.display = 'none';
-        }
-
-        function manejarTecladoBuscador(event) {
-            let box = document.getElementById('box-resultados');
-            if (box.style.display === 'none' || listaCodigosVisibles.length === 0) return;
-            if (event.key === "ArrowDown") {
-                event.preventDefault(); indexSeleccionadoTeclado = (indexSeleccionadoTeclado + 1) % listaCodigosVisibles.length;
-                actualizarFocoVisualBuscador();
-            } else if (event.key === "ArrowUp") {
-                event.preventDefault(); indexSeleccionadoTeclado = (indexSeleccionadoTeclado - 1 + listaCodigosVisibles.length) % listaCodigosVisibles.length;
-                actualizarFocoVisualBuscador();
-            } else if (event.key === "Enter") {
-                event.preventDefault();
-                if (indexSeleccionadoTeclado >= 0) agregarAlCarrito(listaCodigosVisibles[indexSeleccionadoTeclado]);
-            }
-        }
-
-        function actualizarFocoVisualBuscador() {
-            document.querySelectorAll('.resultado-item').forEach((el, idx) => {
-                if (idx === indexSeleccionadoTeclado) { el.classList.add('seleccionado-teclado'); el.scrollIntoView({ block: 'nearest' }); }
-                else el.classList.remove('seleccionado-teclado');
             });
         }
 
@@ -984,13 +547,13 @@
             if(p) { carrito.push({ codigo: p.codigo, nombre: p.nombre, precio: parseFloat(p.venta_usd), pago: 'PM', cantidad: 1 }); renderizarCarrito(); }
         }
 
-        function cambiarCantidadCarrito(index, cambio) {
-            carrito[index].cantidad += cambio;
-            if(carrito[index].cantidad <= 0) carrito.splice(index, 1);
+        function cambiarCantidadCarrito(idx, cambio) {
+            carrito[idx].cantidad += cambio;
+            if(carrito[idx].cantidad <= 0) carrito.splice(idx, 1);
             renderizarCarrito();
         }
 
-        function cambiarMetodoPago(index, metodo) { carrito[index].pago = metodo; renderizarCarrito(); }
+        function cambiarMetodoPago(idx, m) { carrito[idx].pago = m; renderizarCarrito(); }
 
         function renderizarCarrito() {
             let container = document.getElementById('lista-carrito');
@@ -1002,8 +565,7 @@
             carrito.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="carrito-item-card">
-                        <div class="carrito-prod-titulo">${item.nombre}</div>
-                        <div class="carrito-prod-precio">${(item.precio * item.cantidad).toFixed(2)}$</div>
+                        <div class="carrito-prod-titulo">${item.nombre} - ${(item.precio * item.cantidad).toFixed(2)}$</div>
                         <div class="carrito-controles-row">
                             <div class="payment-group">
                                 <button class="btn-pay ${item.pago === 'Bs' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'Bs')">Bs</button>
@@ -1022,90 +584,36 @@
         }
 
         function actualizarTotalesCaja() {
-            let totalUsd = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-            document.getElementById('total-usd').innerText = `${totalUsd.toFixed(2)}$`;
-            document.getElementById('total-bs').innerText = `${(totalUsd * getTasa()).toLocaleString('es-VE', {minimumFractionDigits: 2})} Bs`;
+            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            document.getElementById('total-usd').innerText = `${total.toFixed(2)}$`;
+            document.getElementById('total-bs').innerText = `${(total * 700).toLocaleString('es-VE')} Bs`;
         }
 
         async function procesarVentaCierre() {
             if(carrito.length === 0) return;
-            let totalUsd = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
             let copia = [...carrito];
-            copia.forEach(item => {
-                let p = cacheProductos.find(prod => prod.codigo === item.codigo);
-                if(p) p.stock = Math.max(0, p.stock - item.cantidad);
-            });
-            renderizarInventario();
             carrito = []; renderizarCarrito();
-            lanzarToast("Procesando en cola...");
+            setNetStatus(true);
             try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "procesarVenta", items: copia, total_usd: totalUsd, tasa_applied: getTasa() }) });
-                lanzarToast("Venta en Google Sheets");
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "procesarVenta", items: copia, total_usd: total, tasa_applied: 700 }) });
                 sincronizarTodo(true);
-            } catch(e) { lanzarToast("Guardado local. Error nube."); }
+            } catch(e) { setNetStatus(false, "Error"); }
         }
 
         function renderizarReportes() {
-            let thead = document.getElementById('tabla-reportes-header');
             let tbody = document.getElementById('tabla-reportes-body');
             let msg = document.getElementById('msg-reportes-vacio');
             tbody.innerHTML = '';
-            
-            if(filtroTiempoActual === 'hoy') thead.innerHTML = `<tr><th>Hora</th><th>Vendido</th><th>Total ($)</th><th>Acciones</th></tr>`;
-            else thead.innerHTML = `<tr><th>Fecha</th><th>Acumulado</th><th>Monto ($)</th></tr>`;
-
-            let ahora = new Date(), totalUSD = 0, trans = 0, hayVentas = false;
-            let ordenadas = [...cacheVentas].reverse();
-
-            ordenadas.forEach(v => {
-                let fv = new Date(v.fecha), cumple = false;
-                if(filtroTiempoActual === 'hoy') cumple = fv.toDateString() === ahora.toDateString();
-                else if(filtroTiempoActual === 'semana') { let s7 = new Date(); s7.setDate(ahora.getDate() - 7); cumple = fv >= s7; }
-                else if(filtroTiempoActual === 'mes') cumple = fv.getMonth() === ahora.getMonth() && fv.getFullYear() === ahora.getFullYear();
-
-                if(cumple) {
-                    hayVentas = true; let t_usd = parseFloat(v.total_usd); totalUSD += t_usd; trans++;
-                    let itemsObj = []; try { itemsObj = JSON.parse(v.items); } catch(e) { itemsObj = v.items || []; }
-                    let lista = itemsObj.map(i => `${i.cantidad}x ${i.nombre} (${i.pago})`).join(', ');
-
-                    if(filtroTiempoActual === 'hoy') {
-                        let h = fv.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><strong>${h}</strong></td>
-                                <td><small>${lista}</small></td>
-                                <td><strong>${t_usd.toFixed(2)}$</strong></td>
-                                <td>
-                                    <div class="actions-group">
-                                        <button class="btn-accion-tabla" style="border-color:var(--rojo-alerta); color:var(--rojo-alerta)" onclick="anularVentaRed(${v.id})">Anular</button>
-                                    </div>
-                                </td>
-                            </tr>`;
-                    } else {
-                        let fl = fv.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit' });
-                        tbody.innerHTML += `<tr><td><strong>${fl}</strong></td><td><small>${lista}</small></td><td><strong>${t_usd.toFixed(2)}$</strong></td></tr>`;
-                    }
-                }
+            if(cacheVentas.length === 0) { msg.style.display = 'block'; return; }
+            msg.style.display = 'none';
+            [...cacheVentas].reverse().forEach(v => {
+                let f = new Date(v.fecha).toLocaleDateString();
+                tbody.innerHTML += `<tr><td><strong>${f}</strong></td><td><small>Venta General</small></td><td><strong>${parseFloat(v.total_usd).toFixed(2)}$</strong></td></tr>`;
             });
-            msg.style.display = hayVentas ? 'none' : 'block';
-            document.getElementById('card-total-usd').innerText = `${totalUSD.toFixed(2)}$`;
-            document.getElementById('card-total-bs').innerText = `${(totalUSD * getTasa()).toLocaleString('es-VE', {minimumFractionDigits: 0})} Bsf`;
-            document.getElementById('card-cant-ventas').innerText = trans;
         }
 
-        async function anularVentaRed(id) {
-            if(!confirm("¿Anular venta?")) return;
-            try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "anularVenta", idVenta: id }) });
-                lanzarToast("Venta eliminada"); sincronizarTodo(true);
-            } catch(e) { lanzarToast("Error de conexión"); }
-        }
-
-        window.onload = function() {
-            document.getElementById('lbl-tasa-actual').innerText = getTasa().toFixed(2);
-            sincronizarTodo();
-            setInterval(() => { sincronizarTodo(true); }, 60000);
-        };
+        window.onload = function() { sincronizarTodo(); };
     </script>
 </body>
 </html>
