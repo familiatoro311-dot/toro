@@ -266,7 +266,7 @@
                     <span id="net-text">Conectado</span>
                 </div>
             </div>
-            <div class="tasa-box" onclick="alert('Tasa Fija')">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
+            <div class="tasa-box">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
         </header>
 
         <section id="pantalla-ventas" class="pantalla activa">
@@ -330,8 +330,11 @@
         let filtroTiempoActual = 'hoy';
         let ventaEditandoId = null; 
 
-        // CORREGIDO AQUÍ: Cambio de 'bierto' a 'abierto' para desbloquear todo
-        function toggleMenu() { document.getElementById('sidebar').classList.toggle('abierto'); }
+        // TOTALMENTE CORREGIDO: Uso estricto de la clase 'abierto'
+        function toggleMenu() { 
+            document.getElementById('sidebar').classList.toggle('abierto'); 
+        }
+        
         function getTasa() { return 700; }
 
         function setNetStatus(loading, text = "Conectado") {
@@ -355,13 +358,17 @@
         function cambiarPantalla(pantallaId, elemento) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('activo'));
+            
             document.getElementById(`pantalla-${pantallaId}`).classList.add('activa');
             if(elemento) elemento.classList.add('activo');
             document.getElementById('txt-titulo-pantalla').innerText = pantallaId.toUpperCase();
             
             const subMenu = document.getElementById('sub-menu-reportes-container');
-            if(pantallaId === 'reportes') subMenu.classList.add('visible');
-            else subMenu.classList.remove('visible');
+            if(pantallaId === 'reportes') {
+                subMenu.classList.add('visible');
+            } else {
+                subMenu.classList.remove('visible');
+            }
             document.getElementById('sidebar').classList.remove('abierto');
         }
 
@@ -399,4 +406,194 @@
             if(p) { p.stock = Math.max(0, p.stock + cambio); renderizarInventario(); }
             try {
                 await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "modificarStock", codigo: codigo, cambio: cambio }) });
-            } catch(
+            } catch(e) { setNetStatus(false, "Error"); }
+        }
+
+        function filtrarBusquedaVenta(query) {
+            let box = document.getElementById('box-resultados');
+            if(!query.trim()) { box.style.display = 'none'; return; }
+            box.innerHTML = '';
+            let txt = query.toUpperCase();
+            cacheProductos.forEach(p => {
+                if(p.nombre.includes(txt) || p.codigo.includes(txt)) {
+                    box.style.display = 'block';
+                    box.innerHTML += `
+                        <div class="resultado-item" onclick="agregarAlCarrito('${p.codigo}')">
+                            <span>${p.nombre} (${p.marca})</span>
+                            <strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong>
+                        </div>`;
+                }
+            });
+        }
+
+        function agregarAlCarrito(codigo) {
+            document.getElementById('box-resultados').style.display = 'none';
+            document.getElementById('input-buscar-venta').value = '';
+            let ex = carrito.find(item => item.codigo === codigo);
+            if(ex) { ex.cantidad++; renderizarCarrito(); return; }
+            let p = cacheProductos.find(item => item.codigo === codigo);
+            if(p) { carrito.push({ codigo: p.codigo, nombre: p.nombre, precio: parseFloat(p.venta_usd), pago: 'PM', cantidad: 1 }); renderizarCarrito(); }
+        }
+
+        function cambiarCantidadCarrito(idx, cambio) {
+            carrito[idx].cantidad += cambio;
+            if(carrito[idx].cantidad <= 0) { if(confirm("¿Quitar producto del carrito?")) carrito.splice(idx, 1); else carrito[idx].cantidad = 1; }
+            renderizarCarrito();
+        }
+
+        function cambiarMetodoPago(idx, m) { carrito[idx].pago = m; renderizarCarrito(); }
+
+        function renderizarCarrito() {
+            let container = document.getElementById('lista-carrito');
+            let msg = document.getElementById('msg-carrito-vacio');
+            container.innerHTML = '';
+            if(carrito.length === 0) { msg.style.display = 'block'; actualizarTotalesCaja(); return; }
+            msg.style.display = 'none';
+
+            carrito.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="carrito-item-card">
+                        <div class="carrito-header-row">
+                            <div class="carrito-prod-titulo">${item.nombre} - ${(item.precio * item.cantidad).toFixed(2)}$</div>
+                        </div>
+                        <div class="carrito-controles-row">
+                            <div class="payment-group">
+                                <button class="btn-pay ${item.pago === 'Bs' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'Bs')">Bs</button>
+                                <button class="btn-pay ${item.pago === 'PM' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'PM')">PM</button>
+                                <button class="btn-pay ${item.pago === '$' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, '$')">$</button>
+                            </div>
+                            <div class="stock-control">
+                                <button class="btn-stock" onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
+                                <span>${item.cantidad}</span>
+                                <button class="btn-stock" onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            actualizarTotalesCaja();
+        }
+
+        function actualizarTotalesCaja() {
+            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            document.getElementById('total-usd').innerText = `${total.toFixed(2)}$`;
+            document.getElementById('total-bs').innerText = `${(total * getTasa()).toLocaleString('es-VE')} Bs`;
+        }
+
+        async function procesarVentaCierre() {
+            if(carrito.length === 0) return;
+            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            let copia = [...carrito];
+            
+            let payload = { 
+                action: "procesarVenta", 
+                items: copia, 
+                total_usd: total, 
+                tasa_applied: getTasa() 
+            };
+            
+            if(ventaEditandoId !== null) {
+                payload.modificarVentaId = ventaEditandoId;
+            }
+
+            carrito = []; 
+            ventaEditandoId = null; 
+            renderizarCarrito();
+            setNetStatus(true);
+            
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                sincronizarTodo(true);
+            } catch(e) { setNetStatus(false, "Error Guardando"); }
+        }
+
+        function renderizarReportes() {
+            let thead = document.getElementById('tabla-reportes-header');
+            let tbody = document.getElementById('tabla-reportes-body');
+            let msg = document.getElementById('msg-reportes-vacio');
+            tbody.innerHTML = '';
+            
+            if(filtroTiempoActual === 'hoy') {
+                thead.innerHTML = `<tr><th>Hora</th><th>Vendido</th><th>Monto</th><th>Acciones</th></tr>`;
+            } else {
+                thead.innerHTML = `<tr><th>Fecha</th><th>Detalle</th><th>Monto</th></tr>`;
+            }
+
+            let ahora = new Date(), totalUSD = 0, trans = 0, hayDatos = false;
+            let ordenadas = [...cacheVentas].reverse();
+
+            ordenadas.forEach(v => {
+                let fv = new Date(v.fecha), cumple = false;
+                if(filtroTiempoActual === 'hoy') cumple = fv.toDateString() === ahora.toDateString();
+                else if(filtroTiempoActual === 'semana') { let s7 = new Date(); s7.setDate(ahora.getDate() - 7); cumple = fv >= s7; }
+                else if(filtroTiempoActual === 'mes') cumple = fv.getMonth() === ahora.getMonth() && fv.getFullYear() === ahora.getFullYear();
+
+                if(cumple) {
+                    hayDatos = true;
+                    let t_usd = parseFloat(v.total_usd);
+                    totalUSD += t_usd;
+                    trans++;
+
+                    let itemsObj = [];
+                    try { itemsObj = JSON.parse(v.items); } catch(e) { itemsObj = v.items || []; }
+                    let listaNombres = itemsObj.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
+
+                    if(filtroTiempoActual === 'hoy') {
+                        let horaStr = fv.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${horaStr}</strong></td>
+                                <td><small>${listaNombres}</small></td>
+                                <td><strong>${t_usd.toFixed(2)}$</strong></td>
+                                <td>
+                                    <div class="reporte-acciones-container">
+                                        <button class="btn-modificar-reporte" onclick="cargarVentaParaModificar(${v.id}, '${escape(v.items)}')">Modificar</button>
+                                        <button class="btn-anular-reporte" onclick="anularVentaNube(${v.id})">Anular</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    } else {
+                        let fechaStr = fv.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit' });
+                        tbody.innerHTML += `<tr><td><strong>${fechaStr}</strong></td><td><small>${listaNombres}</small></td><td><strong>${t_usd.toFixed(2)}$</strong></td></tr>`;
+                    }
+                }
+            });
+
+            msg.style.display = hayDatos ? 'none' : 'block';
+            document.getElementById('card-total-usd').innerText = `${totalUSD.toFixed(2)}$`;
+            document.getElementById('card-total-bs').innerText = `${(totalUSD * getTasa()).toLocaleString('es-VE', {maximumFractionDigits: 0})} Bs`;
+            document.getElementById('card-cant-ventas').innerText = trans;
+        }
+
+        function cargarVentaParaModificar(idVenta, itemsEscaped) {
+            if(confirm("¿Deseas cargar esta venta en el carrito para modificarla o procesar una devolución?")) {
+                try {
+                    let itemsObj = JSON.parse(unescape(itemsEscaped));
+                    carrito = itemsObj.map(i => ({
+                        codigo: i.codigo,
+                        nombre: i.nombre,
+                        precio: parseFloat(i.precio),
+                        pago: i.pago || 'PM',
+                        cantidad: parseInt(i.cantidad)
+                    }));
+                    ventaEditandoId = idVenta; 
+                    renderizarCarrito();
+                    cambiarPantalla('ventas', document.getElementById('nav-ventas-tab'));
+                } catch(e) {
+                    alert("Error al intentar reabrir los productos de esta venta.");
+                }
+            }
+        }
+
+        async function anularVentaNube(idVenta) {
+            if(!confirm("¿Estás seguro de que deseas eliminar y anular permanentemente esta venta en la nube? El stock se devolverá.")) return;
+            setNetStatus(true);
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "anularVenta", idVenta: idVenta }) });
+                sincronizarTodo(true);
+            } catch(e) { setNetStatus(false, "Error Red"); }
+        }
+
+        window.onload = function() { sincronizarTodo(); };
+    </script>
+</body>
+</html>
