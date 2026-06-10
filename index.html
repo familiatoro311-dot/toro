@@ -401,29 +401,31 @@
             vertical-align: middle;
         }
 
+
         /* --- TABLAS TRADICIONALES (INVENTARIO Y REPORTES) --- */
         .tabla-toro {
             width: 100%;
             border-collapse: collapse;
-            min-width: 550px; /* Evita que las columnas colapsen en teléfonos pequeños */
+            min-width: 600px;
         }
 
         .tabla-toro th {
             text-transform: uppercase;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             text-align: left;
-            padding-bottom: 12px;
+            padding: 10px 8px 12px 8px;
             border-bottom: 1px solid rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             background: var(--bg-principal);
+            white-space: nowrap;
         }
 
         .tabla-toro td {
-            padding: 12px 0;
+            padding: 12px 8px;
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 14px;
+            font-size: 13px;
             vertical-align: middle;
         }
 
