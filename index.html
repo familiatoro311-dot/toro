@@ -131,7 +131,9 @@
             padding: 6px 12px;
             border-radius: 12px;
             cursor: pointer;
+            transition: background 0.2s;
         }
+        .tasa-box:hover { background: var(--verde-contenedor); }
 
         .pantalla { display: none; }
         .pantalla.activa { display: block; }
@@ -210,7 +212,7 @@
         .tabla-toro th { text-transform: uppercase; font-size: 11px; font-weight: 700; text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(0,0,0,0.1); white-space: nowrap; }
         .tabla-toro td { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; vertical-align: middle; }
         
-        /* BOTONES DE CONTROL DE ACCIONES EN REPORTES */
+        /* BOTONES DE CONTROL */
         .reporte-acciones-container { display: flex; gap: 6px; }
         .btn-anular-reporte { background: var(--blanco); border: 1px solid var(--rojo-alerta); color: var(--rojo-alerta); padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .btn-modificar-reporte { background: var(--blanco); border: 1px solid var(--azul-boton); color: var(--azul-boton); padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
@@ -223,6 +225,21 @@
         .card-resumen p { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
         .card-resumen h3 { font-size: 13px; font-weight: 700; color: var(--verde-oscuro); }
 
+        /* MODAL FLOTANTE DE TASA */
+        .modal-toro {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); z-index: 3000; justify-content: center; align-items: center; padding: 15px;
+        }
+        .modal-toro-contenido {
+            background-color: var(--blanco); border-radius: var(--radio); width: 100%; max-width: 450px;
+            padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; }
+        .btn-cerrar-modal { background: none; border: none; font-size: 20px; cursor: pointer; font-weight: 700; }
+        .input-toro { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--texto-principal); font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 12px; outline: none; }
+        .historial-tasa-container { max-height: 180px; overflow-y: auto; margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; }
+
         /* BARRA FIJA INFERIOR */
         .total-box {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -233,7 +250,7 @@
         .btn-procesar-venta { background-color: var(--verde-oscuro); color: var(--blanco); border: none; padding: 12px 24px; border-radius: 15px; font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase; }
         .total-monto { text-align: right; }
 
-        .btn-primario { background-color: var(--verde-oscuro); color: var(--blanco); border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; text-transform: uppercase; font-size: 12px; }
+        .btn-primario { background-color: var(--verde-oscuro); color: var(--blanco); border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; text-transform: uppercase; font-size: 12px; width: 100%; }
         .vacio-msg { text-align: center; padding: 40px 0; font-style: italic; opacity: 0.6; }
         
         .sync-indicator { font-size: 9px; font-weight: 700; background: rgba(88, 114, 88, 0.1); padding: 4px 8px; border-radius: 8px; display: inline-flex; align-items: center; margin-left: 8px; }
@@ -266,7 +283,7 @@
                     <span id="net-text">Conectado</span>
                 </div>
             </div>
-            <div class="tasa-box">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
+            <div class="tasa-box" onclick="abrirModalTasa()">1$ = <span id="lbl-tasa-actual">700.00</span> BS</div>
         </header>
 
         <section id="pantalla-ventas" class="pantalla activa">
@@ -322,20 +339,46 @@
         </section>
     </main>
 
+    <div id="modal-tasa-container" class="modal-toro" style="display: none;">
+        <div class="modal-toro-contenido">
+            <div class="modal-header">
+                <h2>Ajustar Tasa de Cambio</h2>
+                <button class="btn-cerrar-modal" onclick="cerrarModalTasa()">×</button>
+            </div>
+            <input type="number" step="0.01" id="input-nueva-tasa" class="input-toro" placeholder="0.00">
+            <button class="btn-primario" onclick="guardarNuevaTasaNube()">Guardar Cambios</button>
+            
+            <div class="modal-header" style="margin-top: 15px; margin-bottom: 5px;">
+                <h2>Historial Reciente</h2>
+            </div>
+            <div class="historial-tasa-container">
+                <table class="tabla-toro" style="min-width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th style="text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-tasa-body">
+                        <tr><td colspan="2" style="text-align:center;"><small>Cargando historial...</small></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx5d9ZsEe0AEjwaE1R-uPVP5zh6g6obIALG_RE9k6t7U4PKbsZzNlbet9zEMwjcJVvi/exec";
         let cacheProductos = [];
         let cacheVentas = [];
+        let cacheTasas = [];
+        let tasaActualDolar = 700; // Valor por defecto en caso de fallo de red
         let carrito = [];
         let filtroTiempoActual = 'hoy';
         let ventaEditandoId = null; 
 
-        // TOTALMENTE CORREGIDO: Uso estricto de la clase 'abierto'
-        function toggleMenu() { 
-            document.getElementById('sidebar').classList.toggle('abierto'); 
-        }
-        
-        function getTasa() { return 700; }
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('abierto'); }
+        function getTasa() { return tasaActualDolar; }
 
         function setNetStatus(loading, text = "Conectado") {
             document.getElementById('net-dot').className = loading ? "sync-dot loading" : "sync-dot";
@@ -349,26 +392,84 @@
                 cacheProductos = await resProd.json();
                 let resVentas = await fetch(`${API_URL}?action=obtenerVentas`);
                 cacheVentas = await resVentas.json();
+                
+                // Pedir el historial de tasas reales de la nube
+                let resTasas = await fetch(`${API_URL}?action=obtenerHistorialTasa`);
+                cacheTasas = await resTasas.json();
+                
+                if(cacheTasas.length > 0) {
+                    tasaActualDolar = parseFloat(cacheTasas[cacheTasas.length - 1].valor);
+                    document.getElementById('lbl-tasa-actual').innerText = tasaActualDolar.toFixed(2);
+                }
+
                 renderizarInventario();
                 renderizarReportes();
+                renderizarHistorialTasasModal();
                 setNetStatus(false, "Al día");
             } catch (err) { setNetStatus(false, "Offline"); }
+        }
+
+        /* --- LOGICA MODAL DE TASA --- */
+        function abrirModalTasa() {
+            document.getElementById('modal-tasa-container').style.display = 'flex';
+            document.getElementById('input-nueva-tasa').value = tasaActualDolar;
+            renderizarHistorialTasasModal();
+        }
+
+        function cerrarModalTasa() {
+            document.getElementById('modal-tasa-container').style.display = 'none';
+        }
+
+        function renderizarHistorialTasasModal() {
+            let tbody = document.getElementById('tabla-historial-tasa-body');
+            tbody.innerHTML = '';
+            if(cacheTasas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; font-style:italic;"><small>No hay registros de tasas.</small></td></tr>`;
+                return;
+            }
+            let copiaTasas = [...cacheTasas].reverse();
+            copiaTasas.forEach(t => {
+                let f = new Date(t.fecha);
+                let fechaStr = f.toLocaleDateString('es-VE', {day:'2-digit', month:'2-digit'}) + ' ' + f.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${fechaStr}</small></td>
+                        <td style="text-align: right;"><strong>${parseFloat(t.valor).toFixed(2)} Bs</strong></td>
+                    </tr>`;
+            });
+        }
+
+        async function guardarNuevaTasaNube() {
+            let nueva = parseFloat(document.getElementById('input-nueva-tasa').value);
+            if(isNaN(nueva) || nueva <= 0) { alert("Ingresa un número válido."); return; }
+            
+            setNetStatus(true);
+            cerrarModalTasa();
+            try {
+                let response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "actualizarTasa", nueva_tasa: nueva })
+                });
+                let resJson = await response.json();
+                if(resJson.status === 'success') {
+                    sincronizarTodo(true);
+                }
+            } catch(e) {
+                alert("Error de conexión al guardar la tasa.");
+                setNetStatus(false, "Error");
+            }
         }
 
         function cambiarPantalla(pantallaId, elemento) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('activo'));
-            
             document.getElementById(`pantalla-${pantallaId}`).classList.add('activa');
             if(elemento) elemento.classList.add('activo');
             document.getElementById('txt-titulo-pantalla').innerText = pantallaId.toUpperCase();
             
             const subMenu = document.getElementById('sub-menu-reportes-container');
-            if(pantallaId === 'reportes') {
-                subMenu.classList.add('visible');
-            } else {
-                subMenu.classList.remove('visible');
-            }
+            if(pantallaId === 'reportes') subMenu.classList.add('visible');
+            else subMenu.classList.remove('visible');
             document.getElementById('sidebar').classList.remove('abierto');
         }
 
@@ -491,9 +592,7 @@
                 tasa_applied: getTasa() 
             };
             
-            if(ventaEditandoId !== null) {
-                payload.modificarVentaId = ventaEditandoId;
-            }
+            if(ventaEditandoId !== null) { payload.modificarVentaId = ventaEditandoId; }
 
             carrito = []; 
             ventaEditandoId = null; 
@@ -578,9 +677,7 @@
                     ventaEditandoId = idVenta; 
                     renderizarCarrito();
                     cambiarPantalla('ventas', document.getElementById('nav-ventas-tab'));
-                } catch(e) {
-                    alert("Error al intentar reabrir los productos de esta venta.");
-                }
+                } catch(e) { alert("Error al intentar reabrir los productos de esta venta."); }
             }
         }
 
