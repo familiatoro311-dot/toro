@@ -307,9 +307,12 @@
         </section>
 
         <section id="pantalla-inventario" class="pantalla">
-            <div class="buscador-container">
-                <div class="search-badge">LISTA</div>
-                <input type="text" id="input-buscar-inventario" class="buscador-input" placeholder="FILTRAR INVENTARIO..." oninput="filtrarTablaInventario(this.value)" autocomplete="off">
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                <div class="buscador-container" style="flex: 1; margin-bottom: 0; height: 42px;">
+                    <div class="search-badge">LISTA</div>
+                    <input type="text" id="input-buscar-inventario" class="buscador-input" placeholder="FILTRAR INVENTARIO..." oninput="filtrarTablaInventario(this.value)" autocomplete="off">
+                </div>
+                <button class="btn-primario" style="margin-bottom: 0; width: auto; white-space: nowrap; padding: 0 20px; height: 42px;" onclick="abrirModalNuevoProducto()">+ Nuevo Producto</button>
             </div>
             
             <div class="caja-contenedor">
