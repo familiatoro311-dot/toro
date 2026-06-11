@@ -9,6 +9,63 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
+        /* ESTILOS FIEL COPIA DEL BOCETO "TORO" */
+        .input-toro-boceto {
+            width: 100%;
+            box-sizing: border-box;
+            background: transparent;
+            border: 1px solid #5a7558;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: #334431;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-toro-boceto::placeholder {
+            color: #6a8568;
+        }
+        .campo-boceto-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #5a7558;
+            border-radius: 20px;
+            padding: 6px 15px;
+            background: transparent;
+            margin-bottom: 12px;
+            color: #334431;
+            font-size: 14px;
+        }
+        .campo-boceto-fila input {
+            background: transparent;
+            border: none;
+            text-align: right;
+            outline: none;
+            color: #334431;
+            font-weight: bold;
+            width: 50%;
+        }
+        .input-deshabilitado-boceto {
+            color: #5a7558 !important;
+            font-weight: normal !important;
+        }
+        .btn-boceto-accion {
+            flex: 1;
+            background: transparent;
+            border: 1px solid #5a7558;
+            border-radius: 20px;
+            padding: 8px 5px;
+            color: #334431;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .btn-boceto-accion:hover {
+            background: rgba(90, 117, 88, 0.15);
+        }
+
         :root {
             --bg-principal: #e2ede2;
             --verde-contenedor: #b7d1b7;
@@ -225,7 +282,7 @@
         .card-resumen p { font-size: 9px; font-weight: 700; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
         .card-resumen h3 { font-size: 13px; font-weight: 700; color: var(--verde-oscuro); }
 
-        /* MODAL FLOTANTE DE TASA */
+        /* MODAL FLOTANTE BASE */
         .modal-toro {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.4); z-index: 3000; justify-content: center; align-items: center; padding: 15px;
@@ -348,21 +405,56 @@
     </main>
 
     <div id="modal-producto-container" class="modal-toro" style="display: none;">
-        <div class="modal-toro-contenido">
-            <div class="modal-header">
-                <h2 id="titulo-modal-producto">Nuevo Producto</h2>
-                <button class="btn-cerrar-modal" onclick="cerrarModalProducto()">×</button>
+        <div class="modal-toro-contenido" style="background-color: #b9d5b7; border: 2px solid #5a7558; border-radius: 40px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <input type="text" id="prod-codigo" class="input-toro-boceto" placeholder="CODIGO" style="flex: 1; text-transform: uppercase;">
+                <div style="width: 70px; border: 1px solid #5a7558; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: transparent; color: #5a7558; font-size: 20px;">
+                    🔲
+                </div>
             </div>
-            <input type="text" id="prod-codigo" class="input-toro" placeholder="CÓDIGO" style="text-transform: uppercase;">
-            <input type="text" id="prod-nombre" class="input-toro" placeholder="NOMBRE DEL PRODUCTO" style="text-transform: uppercase;">
-            <input type="text" id="prod-marca" class="input-toro" placeholder="MARCA" style="text-transform: uppercase;">
-            <input type="number" id="prod-stock" class="input-toro" placeholder="STOCK INICIAL">
-            <input type="number" step="0.01" id="prod-precio" class="input-toro" placeholder="PRECIO VENTA ($)">
-            <button class="btn-primario" onclick="guardarProductoNube()">Guardar Producto</button>
+
+            <input type="text" id="prod-nombre" class="input-toro-boceto" placeholder="NOMBRE DEL PRODUCTO" style="text-transform: uppercase; margin-bottom: 12px;">
+
+            <textarea id="prod-descripcion" class="input-toro-boceto" placeholder="DESCRIPCIÓN DEL PRODUCTO" style="text-transform: uppercase; margin-bottom: 12px; height: 100px; resize: none; font-family: inherit; padding-top: 10px;"></textarea>
+
+            <input type="text" id="prod-marca" class="input-toro-boceto" placeholder="MARCA DEL PRODUCTO" style="text-transform: uppercase; margin-bottom: 12px;">
+
+            <div class="campo-boceto-fila">
+                <span>PRECIO DE COMPRA ($)</span>
+                <input type="number" step="0.01" id="prod-compra-usd" placeholder="0 $" oninput="calcularPreciosBs()">
+            </div>
+
+            <div class="campo-boceto-fila">
+                <span>PRECIO DE COMPRA (Bs)</span>
+                <input type="text" id="prod-compra-bs" placeholder="0 Bs" disabled class="input-deshabilitado-boceto">
+            </div>
+
+            <div class="campo-boceto-fila">
+                <span>PRECIO DE VENTA ($)</span>
+                <input type="number" step="0.01" id="prod-precio" placeholder="0 $" oninput="calcularPreciosBs()">
+            </div>
+
+            <div class="campo-boceto-fila">
+                <span>PRECIO DE VENTA (Bs)</span>
+                <input type="text" id="prod-venta-bs" placeholder="0 Bs" disabled class="input-deshabilitado-boceto">
+            </div>
+
+            <div class="campo-boceto-fila" style="margin-bottom: 25px;">
+                <span>STOCK</span>
+                <input type="number" id="prod-stock" placeholder="0">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <button id="btn-modal-modificar" class="btn-boceto-accion" onclick="guardarProductoNube('modificar')">MODIFICAR</button>
+                <button id="btn-modal-aceptar" class="btn-boceto-accion" onclick="guardarProductoNube('agregar')">ACEPTAR</button>
+                <button class="btn-boceto-accion" onclick="cerrarModalProducto()">CANCELAR</button>
+            </div>
+
         </div>
     </div>
-
-        <div id="modal-tasa-container" class="modal-toro" style="display: none;">
+    
+    <div id="modal-tasa-container" class="modal-toro" style="display: none;">
         <div class="modal-toro-contenido">
             <div class="modal-header">
                 <h2>Ajustar Tasa de Cambio</h2>
@@ -391,7 +483,6 @@
     </div>
 
     <script>
-        // ¡RECUERDA PEGAR TU ENLACE /exec RECIENTE AQUÍ ADENTRO!
         const API_URL = "https://script.google.com/macros/s/AKfycbzMUFl55ZLTMSt2_g1M8n2Yxd9t5KxmHa8I7jqEPwpMWBo0I9CuBp0eK0EdSxriIz7e/exec";
         let cacheProductos = [];
         let cacheVentas = [];
@@ -426,7 +517,6 @@
                 }
 
                 renderizarInventario();
-                renderizarReportes();
                 renderizarHistorialTasasModal();
                 setNetStatus(false, "Al día");
             } catch (err) { setNetStatus(false, "Offline"); }
@@ -483,14 +573,6 @@
             document.getElementById('sidebar').classList.remove('abierto');
         }
 
-        function filtrarReporteTiempo(rango, boton) {
-            document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('activo'));
-            boton.classList.add('activo');
-            filtroTiempoActual = rango;
-            renderizarReportes();
-            document.getElementById('sidebar').classList.remove('abierto');
-        }
-
         function renderizarInventario() {
             let tbody = document.getElementById('tabla-inventario-body');
             tbody.innerHTML = '';
@@ -502,296 +584,112 @@
                         <td>${p.marca}</td>
                         <td>
                             <div class="stock-control">
-                                <button class="btn-stock" onclick="modificarStockLocal('${p.codigo}', -1)">-</button>
+                                <button class="btn-stock">-</button>
                                 <span>${p.stock}</span>
-                                <button class="btn-stock" onclick="modificarStockLocal('${p.codigo}', 1)">+</button>
+                                <button class="btn-stock">+</button>
                             </div>
                         </td>
                         <td><strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong></td>
                     </tr>`;
             });
-            // Si hay algo escrito en la barra de búsqueda al sincronizar, mantiene el filtro activo
             let busquedaActual = document.getElementById('input-buscar-inventario').value;
             if(busquedaActual) filtrarTablaInventario(busquedaActual);
         }
 
-        // NUEVA FUNCIÓN: Filtra las filas de la tabla de inventario dinámicamente
         function filtrarTablaInventario(query) {
             let txt = query.toUpperCase().trim();
             let filas = document.querySelectorAll('#tabla-inventario-body tr');
-            
             filas.forEach(fila => {
                 let textoFila = fila.textContent.toUpperCase();
-                if (textoFila.includes(txt)) {
-                    fila.style.display = ""; // Muestra la fila
-                } else {
-                    fila.style.display = "none"; // Oculta la fila
-                }
+                if (textoFila.includes(txt)) fila.style.display = "";
+                else fila.style.display = "none";
             });
         }
-// ... aquí termina tu función filtrarTablaInventario(query) en la línea 530 o 531
 
-    // ==========================================
-    // FUNCIONES PARA CONTROLAR EL MODAL DE PRODUCTO
-    // ==========================================
-    function abrirModalProducto(codigo = '') {
-        const modal = document.getElementById('modal-producto-container');
-        const titulo = document.getElementById('titulo-modal-producto');
-        
-        if (codigo) {
-            titulo.textContent = "Modificar Producto";
-            // Buscamos el producto en tu caché para rellenar el formulario
-            const p = cacheProductos.find(item => item.codigo === codigo);
-            if (p) {
-                document.getElementById('prod-codigo').value = p.codigo;
-                document.getElementById('prod-codigo').disabled = true; // No dejamos editar el código principal
-                document.getElementById('prod-nombre').value = p.nombre;
-                document.getElementById('prod-marca').value = p.marca;
-                document.getElementById('prod-stock').value = p.stock;
-                document.getElementById('prod-precio').value = parseFloat(p.venta_usd).toFixed(2);
-            }
-        } else {
-            titulo.textContent = "Nuevo Producto";
-            // Si es nuevo, limpiamos todos los inputs
-            document.getElementById('prod-codigo').value = '';
-            document.getElementById('prod-codigo').disabled = false;
-            document.getElementById('prod-nombre').value = '';
-            document.getElementById('prod-marca').value = '';
-            document.getElementById('prod-stock').value = '';
-            document.getElementById('prod-precio').value = '';
-        }
-        modal.style.display = 'flex';
-    }
-
-    function cerrarModalProducto() {
-        document.getElementById('modal-producto-container').style.display = 'none';
-    }
-
-    async function guardarProductoNube() {
-        const codigo = document.getElementById('prod-codigo').value.trim().toUpperCase();
-        const nombre = document.getElementById('prod-nombre').value.trim().toUpperCase();
-        const marca = document.getElementById('prod-marca').value.trim().toUpperCase();
-        const stock = parseInt(document.getElementById('prod-stock').value) || 0;
-        const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
-
-        if (!codigo || !nombre) {
-            alert("Por favor, ingresa el código y el nombre del producto.");
-            return;
-        }
-
-        // Estructura de datos idéntica a la que maneja tu base de datos/App Script
-        const datos = {
-            action: "guardarProducto",
-            codigo: codigo,
-            nombre: nombre,
-            marca: marca,
-            stock: stock,
-            precio: precio
-        };
-
-        try {
-            // Nota que usamos 'API_URL' tal cual lo tienes configurado en tu función modificarStockLocal
-            const response = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(datos)
-            });
+        // --- CONTROL INTELIGENTE DEL MODAL DE TU BOCETO ---
+        function calcularPreciosBs() {
+            const tasa = getTasa() || 0;
+            const compraUsd = parseFloat(document.getElementById('prod-compra-usd').value) || 0;
+            document.getElementById('prod-compra-bs').value = compraUsd > 0 ? (compraUsd * tasa).toFixed(2) + " Bs" : "0 Bs";
             
-            cerrarModalProducto();
-            // Aquí puedes llamar a tu función de sincronizar o recargar la página para ver el cambio
-            if (typeof sincronizarDatos === 'function') {
-                sincronizarDatos();
+            const ventaUsd = parseFloat(document.getElementById('prod-precio').value) || 0;
+            document.getElementById('prod-venta-bs').value = ventaUsd > 0 ? (ventaUsd * tasa).toFixed(2) + " Bs" : "0 Bs";
+        }
+
+        function abrirModalProducto(codigo = '') {
+            const modal = document.getElementById('modal-producto-container');
+            if (codigo) {
+                document.getElementById('btn-modal-modificar').style.display = 'block';
+                document.getElementById('btn-modal-aceptar').style.display = 'none';
+                const p = cacheProductos.find(item => item.codigo === codigo);
+                if (p) {
+                    document.getElementById('prod-codigo').value = p.codigo;
+                    document.getElementById('prod-codigo').disabled = true;
+                    document.getElementById('prod-nombre').value = p.nombre;
+                    document.getElementById('prod-marca').value = p.marca;
+                    document.getElementById('prod-stock').value = p.stock;
+                    document.getElementById('prod-precio').value = p.venta_usd || '';
+                    document.getElementById('prod-compra-usd').value = p.compra_usd || '';
+                    document.getElementById('prod-descripcion').value = p.descripcion || '';
+                }
             } else {
-                location.reload(); 
+                document.getElementById('btn-modal-modificar').style.display = 'none';
+                document.getElementById('btn-modal-aceptar').style.display = 'block';
+                document.getElementById('prod-codigo').value = '';
+                document.getElementById('prod-codigo').disabled = false;
+                document.getElementById('prod-nombre').value = '';
+                document.getElementById('prod-marca').value = '';
+                document.getElementById('prod-descripcion').value = '';
+                document.getElementById('prod-stock').value = '';
+                document.getElementById('prod-precio').value = '';
+                document.getElementById('prod-compra-usd').value = '';
             }
-        } catch (error) {
-            console.error("Error al guardar producto:", error);
-            alert("Hubo un error al conectar con el servidor.");
+            calcularPreciosBs();
+            modal.style.display = 'flex';
         }
-    }
 
-    // ... y aquí abajo continuará tu función async function modificarStockLocal(codigo, cambio) que ya tenías.
-        async function modificarStockLocal(codigo, cambio) {
-            let p = cacheProductos.find(item => item.codigo === codigo);
-            if(p) { p.stock = Math.max(0, p.stock + cambio); renderizarInventario(); }
+        function cerrarModalProducto() {
+            document.getElementById('modal-producto-container').style.display = 'none';
+        }
+
+        async function guardarProductoNube(tipoAccion) {
+            const codigo = document.getElementById('prod-codigo').value.trim().toUpperCase();
+            const nombre = document.getElementById('prod-nombre').value.trim().toUpperCase();
+            const marca = document.getElementById('prod-marca').value.trim().toUpperCase();
+            const descripcion = document.getElementById('prod-descripcion').value.trim().toUpperCase();
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+            const precioVenta = parseFloat(document.getElementById('prod-precio').value) || 0;
+            const precioCompra = parseFloat(document.getElementById('prod-compra-usd').value) || 0;
+
+            if (!codigo || !nombre) {
+                alert("El código y nombre son obligatorios.");
+                return;
+            }
+
+            const datos = {
+                action: tipoAccion === 'modificar' ? "modificarProducto" : "agregarProducto",
+                codigo: codigo,
+                nombre: nombre,
+                marca: marca,
+                descripcion: descripcion,
+                stock: stock,
+                venta_usd: precioVenta,
+                compra_usd: precioCompra
+            };
+
             try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "modificarStock", codigo: codigo, cambio: cambio }) });
-            } catch(e) { setNetStatus(false, "Error"); }
-        }
-
-        function filtrarBusquedaVenta(query) {
-            let box = document.getElementById('box-resultados');
-            if(!query.trim()) { box.style.display = 'none'; return; }
-            box.innerHTML = '';
-            let txt = query.toUpperCase();
-            cacheProductos.forEach(p => {
-                if(p.nombre.includes(txt) || p.codigo.includes(txt)) {
-                    box.style.display = 'block';
-                    box.innerHTML += `
-                        <div class="resultado-item" onclick="agregarAlCarrito('${p.codigo}')">
-                            <span>${p.nombre} (${p.marca})</span>
-                            <strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong>
-                        </div>`;
-                }
-            });
-        }
-
-        function agregarAlCarrito(codigo) {
-            document.getElementById('box-resultados').style.display = 'none';
-            document.getElementById('input-buscar-venta').value = '';
-            let ex = carrito.find(item => item.codigo === codigo);
-            if(ex) { ex.cantidad++; renderizarCarrito(); return; }
-            let p = cacheProductos.find(item => item.codigo === codigo);
-            if(p) { carrito.push({ codigo: p.codigo, nombre: p.nombre, precio: parseFloat(p.venta_usd), pago: 'PM', cantidad: 1 }); renderizarCarrito(); }
-        }
-
-        function cambiarCantidadCarrito(idx, cambio) {
-            carrito[idx].cantidad += cambio;
-            if(carrito[idx].cantidad <= 0) { if(confirm("¿Quitar producto del carrito?")) carrito.splice(idx, 1); else carrito[idx].cantidad = 1; }
-            renderizarCarrito();
-        }
-
-        function cambiarMetodoPago(idx, m) { carrito[idx].pago = m; renderizarCarrito(); }
-
-        function renderizarCarrito() {
-            let container = document.getElementById('lista-carrito');
-            let msg = document.getElementById('msg-carrito-vacio');
-            container.innerHTML = '';
-            if(carrito.length === 0) { msg.style.display = 'block'; actualizarTotalesCaja(); return; }
-            msg.style.display = 'none';
-
-            carrito.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="carrito-item-card">
-                        <div class="carrito-header-row">
-                            <div class="carrito-prod-titulo">${item.nombre} - ${(item.precio * item.cantidad).toFixed(2)}$</div>
-                        </div>
-                        <div class="carrito-controles-row">
-                            <div class="payment-group">
-                                <button class="btn-pay ${item.pago === 'Bs' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'Bs')">Bs</button>
-                                <button class="btn-pay ${item.pago === 'PM' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, 'PM')">PM</button>
-                                <button class="btn-pay ${item.pago === '$' ? 'selected' : ''}" onclick="cambiarMetodoPago(${index}, '$')">$</button>
-                            </div>
-                            <div class="stock-control">
-                                <button class="btn-stock" onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
-                                <span>${item.cantidad}</span>
-                                <button class="btn-stock" onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            actualizarTotalesCaja();
-        }
-
-        function actualizarTotalesCaja() {
-            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-            document.getElementById('total-usd').innerText = `${total.toFixed(2)}$`;
-            document.getElementById('total-bs').innerText = `${(total * getTasa()).toLocaleString('es-VE')} Bs`;
-        }
-
-        async function procesarVentaCierre() {
-            if(carrito.length === 0) return;
-            let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-            let copia = [...carrito];
-            
-            let payload = { action: "procesarVenta", items: copia, total_usd: total, tasa_applied: getTasa() };
-            if(ventaEditandoId !== null) { payload.modificarVentaId = ventaEditandoId; }
-
-            carrito = []; 
-            ventaEditandoId = null; 
-            renderizarCarrito();
-            setNetStatus(true);
-            try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                setNetStatus(true);
+                cerrarModalProducto();
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(datos) });
                 sincronizarTodo(true);
-            } catch(e) { setNetStatus(false, "Error Guardando"); }
-        }
-
-        function renderizarReportes() {
-            let thead = document.getElementById('tabla-reportes-header');
-            let tbody = document.getElementById('tabla-reportes-body');
-            let msg = document.getElementById('msg-reportes-vacio');
-            tbody.innerHTML = '';
-            
-            if(filtroTiempoActual === 'hoy') {
-                thead.innerHTML = `<tr><th>Hora</th><th>Vendido</th><th>Monto</th><th>Acciones</th></tr>`;
-            } else {
-                thead.innerHTML = `<tr><th>Fecha</th><th>Detalle</th><th>Monto</th></tr>`;
-            }
-
-            let ahora = new Date(), totalUSD = 0, trans = 0, hayDatos = false;
-            let ordenadas = [...cacheVentas].reverse();
-
-            ordenadas.forEach(v => {
-                let fv = new Date(v.fecha), cumple = false;
-                if(filtroTiempoActual === 'hoy') cumple = fv.toDateString() === ahora.toDateString();
-                else if(filtroTiempoActual === 'semana') { let s7 = new Date(); s7.setDate(ahora.getDate() - 7); cumple = fv >= s7; }
-                else if(filtroTiempoActual === 'mes') cumple = fv.getMonth() === ahora.getMonth() && fv.getFullYear() === ahora.getFullYear();
-
-                if(cumple) {
-                    hayDatos = true;
-                    let t_usd = parseFloat(v.total_usd);
-                    totalUSD += t_usd;
-                    trans++;
-
-                    let itemsObj = [];
-                    try { itemsObj = JSON.parse(v.items); } catch(e) { itemsObj = v.items || []; }
-                    let listaNombres = itemsObj.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
-
-                    if(filtroTiempoActual === 'hoy') {
-                        let horaStr = fv.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><strong>${horaStr}</strong></td>
-                                <td><small>${listaNombres}</small></td>
-                                <td><strong>${t_usd.toFixed(2)}$</strong></td>
-                                <td>
-                                    <div class="reporte-acciones-container">
-                                        <button class="btn-modificar-reporte" onclick="cargarVentaParaModificar(${v.id}, '${escape(v.items)}')">Modificar</button>
-                                        <button class="btn-anular-reporte" onclick="anularVentaNube(${v.id})">Anular</button>
-                                    </div>
-                                </td>
-                            </tr>`;
-                    } else {
-                        let fechaStr = fv.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit' });
-                        tbody.innerHTML += `<tr><td><strong>${fechaStr}</strong></td><td><small>${listaNombres}</small></td><td><strong>${t_usd.toFixed(2)}$</strong></td></tr>`;
-                    }
-                }
-            });
-
-            msg.style.display = hayDatos ? 'none' : 'block';
-            document.getElementById('card-total-usd').innerText = `${totalUSD.toFixed(2)}$`;
-            document.getElementById('card-total-bs').innerText = `${(totalUSD * getTasa()).toLocaleString('es-VE', {maximumFractionDigits: 0})} Bs`;
-            document.getElementById('card-cant-ventas').innerText = trans;
-        }
-
-        function cargarVentaParaModificar(idVenta, itemsEscaped) {
-            if(confirm("¿Deseas cargar esta venta en el carrito para modificarla o procesar una devolución?")) {
-                try {
-                    let itemsObj = JSON.parse(unescape(itemsEscaped));
-                    carrito = itemsObj.map(i => ({
-                        codigo: i.codigo,
-                        nombre: i.nombre,
-                        precio: parseFloat(i.precio),
-                        pago: i.pago || 'PM',
-                        cantidad: parseInt(i.cantidad)
-                    }));
-                    ventaEditandoId = idVenta; 
-                    renderizarCarrito();
-                    cambiarPantalla('ventas', document.getElementById('nav-ventas-tab'));
-                } catch(e) { alert("Error al intentar reabrir los productos de esta venta."); }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error al conectar con la base de datos.");
             }
         }
 
-        async function anularVentaNube(idVenta) {
-            if(!confirm("¿Estás seguro de que deseas eliminar y anular permanentemente esta venta en la nube? El stock se devolverá.")) return;
-            setNetStatus(true);
-            try {
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "anularVenta", idVenta: idVenta }) });
-                sincronizarTodo(true);
-            } catch(e) { setNetStatus(false, "Error Red"); }
-        }
-
-        window.onload = function() { sincronizarTodo(); };
+        // Inicializar la carga automática del sistema al abrir
+        window.onload = () => { sincronizarTodo(); };
     </script>
 </body>
 </html>
