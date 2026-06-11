@@ -350,7 +350,14 @@
                 <button class="btn-qr">📷</button>
             </div>
             <div id="box-resultados" class="resultados-busqueda"></div>
+<div class="buscador-container">
+    <div class="search-badge">PROD</div>
+    <input type="text" id="input-buscar-venta" class="buscador-input" placeholder="BUSCAR REPUESTO..." oninput="BusquedaVenta(thisfiltrar.value)" autocomplete="off">
+    <button class="btn-qr">📷</button>
+</div>
+<div id="box-resultados" class="resultados-busqueda"></div> ```
 
+Para evitar añadir etiquetas de más y aprovechar la estructura limpia que ya tienes, **usaremos ese mismo div (`box-resultados`) como nuestra lista flot
             <div id="lista-carrito"></div>
             <div id="msg-carrito-vacio" class="vacio-msg">El carrito está vacío. Busca un repuesto arriba.</div>
             
@@ -596,14 +603,131 @@
             if(busquedaActual) filtrarTablaInventario(busquedaActual);
         }
 
-        function filtrarTablaInventario(query) {
+      // --- SISTEMA DE BÚSQUEDA FLOTANTE CON TECLADO Y MOUSE ---
+        let indexEnfocado = -1;
+
+        function filtrarBusquedaVenta(query) {
+            let box = document.getElementById('box-resultados');
+            if(!query.trim()) { 
+                box.style.display = 'none'; 
+                indexEnfocado = -1;
+                return; 
+            }
+            box.innerHTML = '';
             let txt = query.toUpperCase().trim();
-            let filas = document.querySelectorAll('#tabla-inventario-body tr');
-            filas.forEach(fila => {
-                let textoFila = fila.textContent.toUpperCase();
-                if (textoFila.includes(txt)) fila.style.display = "";
-                else fila.style.display = "none";
+            let conCoincidencias = false;
+
+            indexEnfocado = -1; // Reiniciar índice al escribir
+
+            cacheProductos.forEach(p => {
+                if((p.nombre && p.nombre.toUpperCase().includes(txt)) || 
+                   (p.codigo && p.codigo.toUpperCase().includes(txt)) ||
+                   (p.marca && p.marca.toUpperCase().includes(txt))) {
+                    
+                    box.style.display = 'block';
+                    conCoincidencias = true;
+
+                    let item = document.createElement('div');
+                    item.className = 'resultado-item';
+                    item.style.display = 'flex';
+                    item.style.justifyContent = 'space-between';
+                    
+                    item.innerHTML = `
+                        <span><strong>${p.codigo}</strong> - ${p.nombre} <small style="opacity:0.7;">(${p.marca || 'S/M'})</small></span>
+                        <strong>${parseFloat(p.venta_usd).toFixed(2)}$</strong>
+                    `;
+
+                    // Clic con el mouse
+                    item.onclick = function() {
+                        agregarAlCarrito(p.codigo);
+                    };
+
+                    box.appendChild(item);
+                }
             });
+
+            if(!conCoincidencias) {
+                box.innerHTML = `<div class="resultado-item" style="color: #888; cursor: default;">No se encontraron repuestos</div>`;
+                box.style.display = 'block';
+            }
+        }
+
+        // Escucha de eventos de teclado en el input de búsqueda
+        document.getElementById('input-buscar-venta').addEventListener('keydown', function(e) {
+            let box = document.getElementById('box-resultados');
+            let items = box.querySelectorAll('.resultado-item');
+
+            if (items.length === 0 || box.style.display === 'none') return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                indexEnfocado++;
+                if (indexEnfocado >= items.length) indexEnfocado = 0;
+                actualizarEnfoqueTeclado(items);
+            } 
+            else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                indexEnfocado--;
+                if (indexEnfocado < 0) indexEnfocado = items.length - 1;
+                actualizarEnfoqueTeclado(items);
+            } 
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (indexEnfocado > -1 && items[indexEnfocado]) {
+                    items[indexEnfocado].click(); // Simula el clic en el elemento seleccionado con las flechas
+                } else if (items.length === 1 && !items[0].innerText.includes("No se encontraron")) {
+                    items[0].click(); // Si hay uno solo en la lista, entra directo con Enter
+                }
+            } 
+            else if (e.key === 'Escape') {
+                box.style.display = 'none';
+                indexEnfocado = -1;
+            }
+        });
+
+        function actualizarEnfoqueTeclado(items) {
+            items.forEach((item, index) => {
+                if (index === indexEnfocado) {
+                    item.classList.add('sugerencia-enfocada');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('sugerencia-enfocada');
+                }
+            });
+        }
+
+        // Cerrar la lista si haces clic afuera del buscador
+        document.addEventListener('click', function(e) {
+            let box = document.getElementById('box-resultados');
+            let input = document.getElementById('input-buscar-venta');
+            if (e.target !== input && e.target !== box) {
+                box.style.display = 'none';
+                indexEnfocado = -1;
+            }
+        });
+
+        function agregarAlCarrito(codigo) {
+            document.getElementById('box-resultados').style.display = 'none';
+            document.getElementById('input-buscar-venta').value = '';
+            indexEnfocado = -1;
+            
+            let ex = carrito.find(item => item.codigo === codigo);
+            if(ex) { 
+                ex.cantidad++; 
+                renderizarCarrito(); 
+                return; 
+            }
+            let p = cacheProductos.find(item => item.codigo === codigo);
+            if(p) { 
+                carrito.push({ 
+                    codigo: p.codigo, 
+                    nombre: p.nombre, 
+                    precio: parseFloat(p.venta_usd), 
+                    pago: 'PM', 
+                    cantidad: 1 
+                }); 
+                renderizarCarrito(); 
+            }
         }
 
         // --- CONTROL INTELIGENTE DEL MODAL DE TU BOCETO ---
