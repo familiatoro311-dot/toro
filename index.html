@@ -312,7 +312,7 @@
                     <div class="search-badge">LISTA</div>
                     <input type="text" id="input-buscar-inventario" class="buscador-input" placeholder="FILTRAR INVENTARIO..." oninput="filtrarTablaInventario(this.value)" autocomplete="off">
                 </div>
-                <button class="btn-primario" style="margin-bottom: 0; width: auto; white-space: nowrap; padding: 0 20px; height: 42px;" onclick="abrirModalNuevoProducto()">+ Nuevo Producto</button>
+               <button class="btn-primario" style="margin-bottom: 0; width: auto; white-space: nowrap; padding: 0 20px; height: 42px;" onclick="abrirModalProducto()">+ Nuevo Producto</button>
             </div>
             
             <div class="caja-contenedor">
@@ -483,7 +483,7 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><small>${p.codigo}</small></td>
-                        <td><strong>${p.nombre}</strong></td>
+                        <td onclick="abrirModalProducto('${p.codigo}')" style="cursor: pointer; color: var(--verde-oscuro);"><strong>${p.nombre}</strong></td>
                         <td>${p.marca}</td>
                         <td>
                             <div class="stock-control">
