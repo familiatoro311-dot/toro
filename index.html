@@ -344,10 +344,25 @@
                 </table>
                 <div id="msg-reportes-vacio" class="vacio-msg">No hay registros guardados.</div>
             </div>
-        </section>
+       </section>
     </main>
 
-    <div id="modal-tasa-container" class="modal-toro" style="display: none;">
+    <div id="modal-producto-container" class="modal-toro" style="display: none;">
+        <div class="modal-toro-contenido">
+            <div class="modal-header">
+                <h2 id="titulo-modal-producto">Nuevo Producto</h2>
+                <button class="btn-cerrar-modal" onclick="cerrarModalProducto()">×</button>
+            </div>
+            <input type="text" id="prod-codigo" class="input-toro" placeholder="CÓDIGO" style="text-transform: uppercase;">
+            <input type="text" id="prod-nombre" class="input-toro" placeholder="NOMBRE DEL PRODUCTO" style="text-transform: uppercase;">
+            <input type="text" id="prod-marca" class="input-toro" placeholder="MARCA" style="text-transform: uppercase;">
+            <input type="number" id="prod-stock" class="input-toro" placeholder="STOCK INICIAL">
+            <input type="number" step="0.01" id="prod-precio" class="input-toro" placeholder="PRECIO VENTA ($)">
+            <button class="btn-primario" onclick="guardarProductoNube()">Guardar Producto</button>
+        </div>
+    </div>
+
+        <div id="modal-tasa-container" class="modal-toro" style="display: none;">
         <div class="modal-toro-contenido">
             <div class="modal-header">
                 <h2>Ajustar Tasa de Cambio</h2>
@@ -514,7 +529,87 @@
                 }
             });
         }
+// ... aquí termina tu función filtrarTablaInventario(query) en la línea 530 o 531
 
+    // ==========================================
+    // FUNCIONES PARA CONTROLAR EL MODAL DE PRODUCTO
+    // ==========================================
+    function abrirModalProducto(codigo = '') {
+        const modal = document.getElementById('modal-producto-container');
+        const titulo = document.getElementById('titulo-modal-producto');
+        
+        if (codigo) {
+            titulo.textContent = "Modificar Producto";
+            // Buscamos el producto en tu caché para rellenar el formulario
+            const p = cacheProductos.find(item => item.codigo === codigo);
+            if (p) {
+                document.getElementById('prod-codigo').value = p.codigo;
+                document.getElementById('prod-codigo').disabled = true; // No dejamos editar el código principal
+                document.getElementById('prod-nombre').value = p.nombre;
+                document.getElementById('prod-marca').value = p.marca;
+                document.getElementById('prod-stock').value = p.stock;
+                document.getElementById('prod-precio').value = parseFloat(p.venta_usd).toFixed(2);
+            }
+        } else {
+            titulo.textContent = "Nuevo Producto";
+            // Si es nuevo, limpiamos todos los inputs
+            document.getElementById('prod-codigo').value = '';
+            document.getElementById('prod-codigo').disabled = false;
+            document.getElementById('prod-nombre').value = '';
+            document.getElementById('prod-marca').value = '';
+            document.getElementById('prod-stock').value = '';
+            document.getElementById('prod-precio').value = '';
+        }
+        modal.style.display = 'flex';
+    }
+
+    function cerrarModalProducto() {
+        document.getElementById('modal-producto-container').style.display = 'none';
+    }
+
+    async function guardarProductoNube() {
+        const codigo = document.getElementById('prod-codigo').value.trim().toUpperCase();
+        const nombre = document.getElementById('prod-nombre').value.trim().toUpperCase();
+        const marca = document.getElementById('prod-marca').value.trim().toUpperCase();
+        const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+        const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
+
+        if (!codigo || !nombre) {
+            alert("Por favor, ingresa el código y el nombre del producto.");
+            return;
+        }
+
+        // Estructura de datos idéntica a la que maneja tu base de datos/App Script
+        const datos = {
+            action: "guardarProducto",
+            codigo: codigo,
+            nombre: nombre,
+            marca: marca,
+            stock: stock,
+            precio: precio
+        };
+
+        try {
+            // Nota que usamos 'API_URL' tal cual lo tienes configurado en tu función modificarStockLocal
+            const response = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify(datos)
+            });
+            
+            cerrarModalProducto();
+            // Aquí puedes llamar a tu función de sincronizar o recargar la página para ver el cambio
+            if (typeof sincronizarDatos === 'function') {
+                sincronizarDatos();
+            } else {
+                location.reload(); 
+            }
+        } catch (error) {
+            console.error("Error al guardar producto:", error);
+            alert("Hubo un error al conectar con el servidor.");
+        }
+    }
+
+    // ... y aquí abajo continuará tu función async function modificarStockLocal(codigo, cambio) que ya tenías.
         async function modificarStockLocal(codigo, cambio) {
             let p = cacheProductos.find(item => item.codigo === codigo);
             if(p) { p.stock = Math.max(0, p.stock + cambio); renderizarInventario(); }
